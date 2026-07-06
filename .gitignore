@@ -1,0 +1,23 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+.env
+
+# Generated data (rebuild with scripts 01–04)
+data/raw/
+data/processed/
+data/chunks/
+data/index/
+
+# Models cache
+.cache/
+
+# IDE / tooling (keep local only)
+.idea/
+.cursor/
+.pytest_cache/
+
+# OS
+.DS_Store
+Thumbs.db
