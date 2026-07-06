@@ -10,7 +10,12 @@ Run scripts in order. Each step teaches one part of a RAG retrieval pipeline.
 | 4 | `04_index.py` | Embeddings + Qdrant + BM25 |
 | 5 | `05_query.py` | Hybrid search + reranking |
 
-**Milestone:** ask a question → get 5 ranked doc chunks with sources. No LLM yet (Week 2).
+**Milestone:** ask a question → get 5 ranked doc chunks with sources. No LLM yet — that is [Week 2](WEEK2_PLAN.md).
+
+## After Week 1
+
+- Summary of what you built → [WEEK1_SUMMARY.md](WEEK1_SUMMARY.md)
+- Next steps → [WEEK2_PLAN.md](WEEK2_PLAN.md)
 
 ## Concepts to read about
 
@@ -20,4 +25,4 @@ Run scripts in order. Each step teaches one part of a RAG retrieval pipeline.
 - Cross-encoder reranking
 - Vector databases (Qdrant)
 
-See `docs/CHUNKING.md` for the chunking design note.
+Chunking design → [CHUNKING.md](CHUNKING.md)

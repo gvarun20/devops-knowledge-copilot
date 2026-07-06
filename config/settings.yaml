@@ -4,6 +4,8 @@ paths:
   processed_documents: data/processed/documents.jsonl
   chunks: data/chunks/chunks.jsonl
   bm25_corpus: data/index/bm25_corpus.json
+  eval_questions: evaluation/questions.jsonl
+  eval_results: evaluation/results
 
 doc_sources:
   kubernetes:
@@ -41,3 +43,12 @@ retrieval:
   semantic_top_k: 20
   keyword_top_k: 20
   rrf_k: 60
+
+generation:
+  provider: ollama          # ollama (free/local) or openai (paid API)
+  model: llama3.2:3b         # run: ollama pull llama3.2:3b
+  base_url: http://localhost:11434/v1
+  ollama_host: http://localhost:11434
+  temperature: 0.1
+  max_tokens: 1024
+  unknown_phrase: "I don't know based on the provided documentation."

@@ -33,3 +33,29 @@ class SearchHit(BaseModel):
     content: str
     score: float
     rank: int
+
+
+class SourceCitation(BaseModel):
+    rank: int
+    tool: str
+    document_title: str
+    section_header: str
+    source_url: str
+
+
+class AnswerResult(BaseModel):
+    question: str
+    answer: str
+    sources: list[SourceCitation]
+    retrieval_mode: str = "full"
+    chunks_used: int = 0
+
+
+class EvalQuestion(BaseModel):
+    id: str
+    question: str
+    expected_answer: str
+    source_tool: str
+    source_section: str = ""
+    doc_url: str = ""
+    should_know: bool = True
