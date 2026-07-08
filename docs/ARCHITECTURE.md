@@ -1,6 +1,8 @@
 # Architecture
 
-System design for the DevOps Knowledge Copilot RAG pipeline.
+System design for the DevOps Knowledge Copilot RAG pipeline — documented as part of a **learning project**.
+
+**Context:** [PROJECT_DOCUMENTATION.md](PROJECT_DOCUMENTATION.md) — problem statement, planning, hurdles, and script reference.
 
 ---
 

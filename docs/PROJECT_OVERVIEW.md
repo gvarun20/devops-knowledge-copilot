@@ -1,62 +1,47 @@
 # Why this project exists
 
-## The problem
+> **This is a learning project.** It was built to understand RAG systems through experimentation — not to deliver a product to a client.
 
-DevOps and platform engineers constantly jump between **Terraform** and **Kubernetes** documentation while designing infrastructure, debugging deployments, and onboarding teammates. Official docs are authoritative but huge — thousands of pages, version-specific syntax, and search that only matches keywords.
+## The problem we wanted to solve (for learning)
 
-Generic chatbots make this worse: they answer confidently from memory, often with **outdated or wrong** HCL/YAML. A wrong `lifecycle` block or a misconfigured `Deployment` spec can break production.
+DevOps engineers constantly jump between **Terraform** and **Kubernetes** documentation. Official docs are authoritative but huge. Generic chatbots hallucinate version-specific syntax.
 
-## Who this is for
+**Learning question:** Can we build a system that answers only from retrieved official docs, with citations, and measure if it actually works?
 
-- Engineers learning **Terraform** and **Kubernetes** in depth
-- Anyone building a **portfolio-grade RAG system** with measured quality, not a demo chatbot
-- A structured **learning project** with weekly milestones
+## What makes this a learning project (not a product)
 
-## What makes this different from a tutorial clone
+| Learning project | Production product |
+|-----------------|-------------------|
+| Numbered scripts to understand each layer | Hidden pipeline behind one deploy button |
+| Ablation experiments to compare approaches | Single "best" config chosen for users |
+| Documented failures and limitations | Marketing claims |
+| Free local stack (Ollama) | Paid cloud infrastructure |
+| GitHub Pages portfolio site | 24/7 hosted SaaS |
 
-| Typical RAG tutorial | This project |
-|---------------------|--------------|
-| Fixed-size text splitting | **Header-aware chunking** aligned with doc structure |
-| Vector search only | **Hybrid** semantic + BM25 + RRF + reranker |
-| "It seems to work" | **RAGAS evaluation** + ablation study |
-| Scraped HTML | **Official GitHub doc sources** (legal, versioned) |
-| Notebook prototype | **Dockerized** pipeline + FastAPI (Week 3: deploy) |
-| Paid GPT required | **Free local stack** — Ollama + local embeddings |
+## What you learn
 
-## Design principles
+- How document ingestion and chunking affect retrieval quality
+- Why hybrid search (semantic + BM25) beats vector-only
+- How to prompt an LLM to stay grounded in retrieved context
+- How to evaluate RAG with RAGAS and ablation studies
+- How to expose a RAG pipeline as a REST API
 
-1. **Ground every answer in retrieved docs** — not the LLM's general knowledge.
-2. **Say "I don't know"** when context is missing — better than hallucinating.
-3. **Measure quality** — retrieval and generation scores you can show in interviews.
-4. **Learn by building** — numbered scripts, small modules, documented decisions.
+## Current state
 
-## Current capabilities
+| Phase | Focus | Status |
+|-------|-------|--------|
+| Week 1 | Retrieval pipeline | ✅ Complete |
+| Week 2 | RAG + evaluation | ✅ Complete |
+| Week 3 | API + UI + CI | ✅ Complete |
 
-| Layer | Status |
-|-------|--------|
-| Doc ingestion (K8s + Terraform v1.9.x) | Complete |
-| Header-aware chunking (~10,961 chunks) | Complete |
-| Hybrid retrieval + reranking | Complete |
-| LLM generation with citations (Ollama) | Complete |
-| RAGAS evaluation + ablation scripts | Built — run to collect scores |
-| FastAPI REST API | Built |
+## Full documentation
+
+→ **[PROJECT_DOCUMENTATION.md](PROJECT_DOCUMENTATION.md)** — problem statement, planning, architecture, hurdles, scripts
 
 ## Interview talking points
 
-- Why header-aware chunking beats naive fixed-length splits
-- How hybrid retrieval + reranking improved your eval numbers (ablation table)
-- Why you chose local embeddings vs API embeddings (cost vs quality tradeoff)
-- How you handle doc sources that moved (Terraform → `web-unified-docs`)
-- How the prompt enforces faithfulness and "I don't know" behavior
-
-## Documentation map
-
-| Doc | Purpose |
-|-----|---------|
-| [GETTING_STARTED.md](GETTING_STARTED.md) | Full setup from zero |
-| [WEEK1_SUMMARY.md](WEEK1_SUMMARY.md) | Retrieval pipeline achievements |
-| [WEEK2_PLAN.md](WEEK2_PLAN.md) | Generation, eval, API checklist |
-| [ARCHITECTURE.md](ARCHITECTURE.md) | Diagrams and module map |
-| [ROADMAP.md](ROADMAP.md) | Week 3–4 plan |
-| [FREE_SETUP.md](FREE_SETUP.md) | Ollama install guide |
-| [EVAL_RESULTS.md](EVAL_RESULTS.md) | Your RAGAS scores |
+- Why header-aware chunking beats fixed-size splits
+- How hybrid retrieval improved eval numbers (0.41 → 0.89 relevancy)
+- Why we chose local Ollama (free learning) vs OpenAI
+- How we handled Terraform docs moving to MDX format
+- Honest limitations: small eval set, 3B model constraints

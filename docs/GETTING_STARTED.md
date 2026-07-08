@@ -1,8 +1,10 @@
 # Getting started — full walkthrough
 
+> **Learning project** — follow these steps to reproduce the experiments yourself.
+
 This guide takes you from a fresh clone to a working **question → cited answer** system.
 
-**Industry workflow:** After setup, read **[PORTFOLIO.md](PORTFOLIO.md)** for interview demo steps.
+**Full context:** [PROJECT_DOCUMENTATION.md](PROJECT_DOCUMENTATION.md) — problem statement, architecture, hurdles, and script reference.
 
 **Time:** ~30 minutes first run (indexing dominates; ~15 min for step 4 alone).
 

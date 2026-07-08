@@ -1,30 +1,28 @@
-# Status — portfolio project complete
+# Project status — learning complete
 
-This project is **done for job-hunting purposes**. Everything below is built and free.
+This project was built **to learn RAG concepts**. All three learning phases are complete.
 
-| Done | What |
-|------|------|
-| ✅ | Retrieval pipeline (hybrid + rerank) |
-| ✅ | RAG + citations (Ollama) |
-| ✅ | RAGAS eval + ablation |
-| ✅ | FastAPI + static UI |
-| ✅ | Docker (Qdrant) + pytest CI |
-| ✅ | Docs + eval numbers for resume |
+| Phase | What was learned | Status |
+|-------|-----------------|--------|
+| Week 1 | Retrieval: ingest → chunk → index → hybrid search | ✅ |
+| Week 2 | Generation + RAGAS evaluation + ablation | ✅ |
+| Week 3 | FastAPI + UI + Docker + CI + GitHub Pages | ✅ |
 
 ---
 
-## Optional polish (only if you have time)
+## Optional next learning (if you want to go deeper)
 
-| Task | Why |
-|------|-----|
-| Screen recording GIF in README | Recruiters who won't clone the repo |
-| Run eval on 10 questions | Stronger numbers in README |
-| Add MIT LICENSE file | Professional touch on GitHub |
-
-**Skip:** cloud deploy, paid APIs, Kubernetes prod cluster — not needed for a portfolio demo.
+| Topic | Why explore it |
+|-------|---------------|
+| Run eval on 10+ questions | Stronger statistical confidence |
+| Try `phi3:mini` or OpenAI for full RAGAS metrics | Learn model size impact on eval |
+| Read `src/retrieval/fusion.py` and rewrite RRF from scratch | Deepen understanding |
+| Add a new doc source (e.g. Helm docs) | Practice extending the pipeline |
 
 ---
 
-## How to use this project
+## Main documentation
 
-→ **[PORTFOLIO.md](PORTFOLIO.md)** — resume bullets + interview demo script
+→ **[PROJECT_DOCUMENTATION.md](PROJECT_DOCUMENTATION.md)** — complete project record
+
+→ **[PORTFOLIO.md](PORTFOLIO.md)** — how to present this in job applications

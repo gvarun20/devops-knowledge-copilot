@@ -1,6 +1,6 @@
-# Portfolio guide — get the job
+# Portfolio guide — present your learning project
 
-This is a **demo project for your resume**, not a product for clients. Keep it **simple and free**.
+This project was built **to learn RAG concepts**. Use this guide to present it in job applications.
 
 ---
 

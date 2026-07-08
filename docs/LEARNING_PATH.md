@@ -1,6 +1,8 @@
 # Learning path
 
-Run scripts in order. Each step teaches one layer of a production-style RAG system.
+> **This is a learning project.** Run scripts in order — each step teaches one layer of a RAG system before the next depends on it.
+
+**Full project documentation:** [PROJECT_DOCUMENTATION.md](PROJECT_DOCUMENTATION.md)
 
 ---
 

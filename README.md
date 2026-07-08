@@ -1,126 +1,104 @@
 # DevOps Knowledge Copilot
 
-**Portfolio project** — RAG over official Kubernetes & Terraform docs. Grounded answers with citations.
+**A learning project** — built to understand RAG (Retrieval-Augmented Generation) concepts through hands-on experimentation over Kubernetes and Terraform documentation.
 
-**Cost: $0** — Python, Docker (Qdrant only), Ollama, GitHub. No cloud, no API keys.
+Not a commercial product. Every script and experiment exists to learn how modern AI-assisted documentation systems work.
 
-**Repo:** [github.com/gvarun20/devops-knowledge-copilot](https://github.com/gvarun20/devops-knowledge-copilot)
-
-**Live site:** [gvarun20.github.io/devops-knowledge-copilot](https://gvarun20.github.io/devops-knowledge-copilot/)
-
----
-
-## For recruiters (30-second summary)
-
-Built a **hybrid RAG pipeline** (Qdrant + BM25 + reranker) over ~11k doc chunks. Measured with **RAGAS**: answer relevancy **0.70**, hybrid retrieval beats vector-only **0.41 → 0.89**. Exposed via **FastAPI** + static UI. All local, no paid services.
-
-Full interview script → **[docs/PORTFOLIO.md](docs/PORTFOLIO.md)**
+**Repo:** [github.com/gvarun20/devops-knowledge-copilot](https://github.com/gvarun20/devops-knowledge-copilot)  
+**Website:** [gvarun20.github.io/devops-knowledge-copilot](https://gvarun20.github.io/devops-knowledge-copilot/)  
+**Cost:** $0 — Python, Docker, Ollama, GitHub
 
 ---
 
-## Demo in an interview (2 terminals)
+## Start here
 
-**Before the call:** index built once, Ollama running, `ollama pull llama3.2:3b`
+| I want to… | Read this |
+|------------|-----------|
+| **Understand the full project** (problem, plan, architecture, hurdles, scripts) | **[docs/PROJECT_DOCUMENTATION.md](docs/PROJECT_DOCUMENTATION.md)** |
+| Run it for the first time | [docs/GETTING_STARTED.md](docs/GETTING_STARTED.md) |
+| Follow the learning path script by script | [docs/LEARNING_PATH.md](docs/LEARNING_PATH.md) |
+| Prepare for interviews | [docs/PORTFOLIO.md](docs/PORTFOLIO.md) |
 
-```powershell
-# Terminal 1 — start services + API
-.\scripts\dev.ps1 demo
+---
 
-# Terminal 2 — chat UI in browser
-.\scripts\dev.ps1 ui-local
+## What this project teaches
+
+```
+Official docs → ingest → chunk → index → hybrid retrieval → LLM answer with citations
+                                              ↓
+                                        RAGAS evaluation + ablation
 ```
 
-Open **http://localhost:8080** → ask: *"How do I create a Kubernetes Deployment?"*
-
-**Even simpler (no browser):** `python scripts/06_ask.py -i`
+| Layer | What you learn |
+|-------|----------------|
+| **Data** | Sparse Git clone, Markdown/MDX parsing, header-aware chunking |
+| **Retrieval** | Embeddings, Qdrant, BM25, RRF fusion, cross-encoder rerank |
+| **Generation** | Grounded prompts, citations, refusal behavior |
+| **Evaluation** | RAGAS metrics, ablation studies, honest limitations |
+| **Integration** | FastAPI, static UI, Docker, CI |
 
 ---
 
-## First-time setup (one time, ~30 min)
+## Quick demo
 
 ```powershell
-git clone https://github.com/gvarun20/devops-knowledge-copilot.git
-cd devops-knowledge-copilot
-py -3 -m venv .venv
-.\.venv\Scripts\Activate.ps1
-pip install -r requirements.txt
-
 docker compose up -d qdrant
-python scripts/01_setup_data.py
-python scripts/02_ingest.py
-python scripts/03_chunk.py
-python scripts/04_index.py
-ollama pull llama3.2:3b
+.\scripts\dev.ps1 api          # terminal 1
+python scripts/06_ask.py -i    # terminal 2 — simplest demo
 ```
 
-Details → [docs/GETTING_STARTED.md](docs/GETTING_STARTED.md)
+Or browser UI: `.\scripts\dev.ps1 ui-local` → http://localhost:8080
 
 ---
 
-## What you built (resume bullets)
+## Experiments and results
 
-- Hybrid retrieval (semantic + BM25 + RRF + cross-encoder rerank) over official K8s/Terraform docs
-- RAG pipeline with citation-backed answers via local LLM (Ollama)
-- RAGAS evaluation + ablation study with published metrics
-- FastAPI REST API (`/ask`, `/health`) + static chat UI
-- CI with pytest on every push
-
----
-
-## Eval results
-
-| Metric | Score |
-|--------|-------|
-| answer_relevancy | 0.70 |
-| context_recall | 0.47 |
-| hybrid vs semantic-only (relevancy) | 0.41 → **0.89** |
+| Experiment | Result | Learning |
+|------------|--------|----------|
+| Hybrid vs semantic-only | relevancy 0.41 → **0.89** | BM25 catches exact terms embeddings miss |
+| Baseline (5 questions) | relevancy **0.70**, recall **0.47** | Retrieval is the main improvement lever |
+| ~11k chunks indexed | K8s + Terraform official docs | Real-scale ingestion, not toy data |
 
 → [docs/EVAL_RESULTS.md](docs/EVAL_RESULTS.md)
 
 ---
 
-## Commands
+## Scripts (learning order)
 
-```powershell
-.\scripts\dev.ps1 demo      # Start Qdrant + print demo steps
-.\scripts\dev.ps1 api       # API (terminal 1)
-.\scripts\dev.ps1 ui-local  # UI (terminal 2)
-.\scripts\dev.ps1 ask       # CLI chat
-.\scripts\dev.ps1 test      # pytest
-```
+| # | Script | Teaches |
+|---|--------|---------|
+| 00 | `00_check_ollama.py` | Verify LLM is ready |
+| 01 | `01_setup_data.py` | Clone doc repos |
+| 02 | `02_ingest.py` | Parse documents |
+| 03 | `03_chunk.py` | Header-aware chunking |
+| 04 | `04_index.py` | Embeddings + Qdrant + BM25 |
+| 05 | `05_query.py` | Hybrid retrieval (no LLM) |
+| 06 | `06_ask.py` | Full RAG with citations |
+| 07 | `07_evaluate.py` | RAGAS evaluation |
+| 08 | `08_ablation.py` | Compare retrieval modes |
 
----
-
-## Stack (all free)
-
-| Piece | Tool |
-|-------|------|
-| Vector DB | Qdrant (Docker) |
-| Keyword search | BM25 (local file) |
-| Embeddings | HuggingFace (local) |
-| LLM | Ollama `llama3.2:3b` |
-| API | FastAPI |
-| UI | Static HTML (`docs/index.html`) |
-| Hosting | GitHub repo + **GitHub Pages** website |
+Full script reference → [docs/PROJECT_DOCUMENTATION.md#7-scripts-reference](docs/PROJECT_DOCUMENTATION.md#7-scripts-reference)
 
 ---
 
-## GitHub Pages website
+## Documentation
 
-**https://gvarun20.github.io/devops-knowledge-copilot/**
-
-Portfolio site with overview, metrics, and example answer. Enable: **Settings → Pages → GitHub Actions**.
-
-Live chat: run locally with `.\scripts\dev.ps1 ui-local`. Details → [docs/HOSTING.md](docs/HOSTING.md)
+| Doc | Purpose |
+|-----|---------|
+| **[PROJECT_DOCUMENTATION.md](docs/PROJECT_DOCUMENTATION.md)** | **Master doc** — problem, plan, architecture, hurdles, scripts |
+| [LEARNING_PATH.md](docs/LEARNING_PATH.md) | Week-by-week learning order |
+| [ARCHITECTURE.md](docs/ARCHITECTURE.md) | Technical diagrams |
+| [CHUNKING.md](docs/CHUNKING.md) | Chunking design |
+| [EVAL_RESULTS.md](docs/EVAL_RESULTS.md) | All experiment results |
+| [PORTFOLIO.md](docs/PORTFOLIO.md) | Resume + interview guide |
+| [GETTING_STARTED.md](docs/GETTING_STARTED.md) | Setup walkthrough |
 
 ---
 
-## Docs
+## Stack (all free, all local)
 
-| Doc | When to read |
-|-----|--------------|
-| **[PORTFOLIO.md](docs/PORTFOLIO.md)** | **Before interviews** |
-| [HOSTING.md](docs/HOSTING.md) | Enable GitHub Pages |
-| [GETTING_STARTED.md](docs/GETTING_STARTED.md) | First setup |
-| [ARCHITECTURE.md](docs/ARCHITECTURE.md) | System design questions |
-| [EVAL_RESULTS.md](docs/EVAL_RESULTS.md) | Metrics deep-dive |
+Python · FastAPI · Qdrant · BM25 · HuggingFace embeddings · Ollama · RAGAS · Docker · GitHub Actions · GitHub Pages
+
+---
+
+*Built for learning. Documented for understanding. Shared for portfolio.*
