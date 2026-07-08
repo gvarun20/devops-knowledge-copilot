@@ -136,20 +136,58 @@ All tunables in `config/settings.yaml`:
 | `retrieval` | Semantic/keyword top-k, RRF k |
 | `generation` | Provider (ollama/openai), model, temperature |
 
+Environment variables override YAML — see `src/config.py` and `.env.example`.
+
 ---
 
-## Infrastructure (local)
+## Deployment architecture (industry standard)
+
+```mermaid
+flowchart LR
+    subgraph client [Browser]
+        UI[Static UI]
+    end
+    subgraph host [Your machine or cloud]
+        NGINX[nginx :8080]
+        API[FastAPI :8000]
+        QD[(Qdrant :6333)]
+    end
+    subgraph external [External]
+        GH[GitHub Pages]
+        OLL[Ollama host]
+    end
+
+    GH -.->|optional hosted UI| UI
+    UI -->|POST /ask JSON| API
+    NGINX -->|serves docs/| UI
+    API --> QD
+    API --> OLL
+```
+
+| Component | Dev | Production (target) |
+|-----------|-----|---------------------|
+| UI | `docker compose` nginx :8080 | GitHub Pages |
+| API | Docker or `uvicorn --reload` | Render / Railway (HTTPS) |
+| Qdrant | Docker volume | Qdrant Cloud |
+| LLM | Ollama on host | OpenAI / hosted GPU |
+
+Runbook → [OPERATIONS.md](OPERATIONS.md)
+
+---
+
+## Infrastructure (Docker Compose)
 
 | Service | Image | Port | Purpose |
 |---------|-------|------|---------|
-| Qdrant | `qdrant/qdrant:v1.13.2` | 6333 | Vector storage |
+| `qdrant` | `qdrant/qdrant:v1.13.2` | 6333 | Vector storage |
+| `api` | Built from `docker/Dockerfile.api` | 8000 | FastAPI backend |
+| `ui` | `nginx:alpine` | 8080 | Serves `docs/` static frontend |
 
 ```powershell
 docker compose up -d
 ```
 
-Container name: `devops-copilot-qdrant`  
-Compose project: `devops-knowledge-copilot`
+Environment overrides: `QDRANT_HOST`, `OLLAMA_HOST` — see [OPERATIONS.md](OPERATIONS.md).
 
 ---
 

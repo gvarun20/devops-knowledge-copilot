@@ -2,6 +2,8 @@
 
 This guide takes you from a fresh clone to a working **question → cited answer** system.
 
+**Industry workflow:** After setup, read **[OPERATIONS.md](OPERATIONS.md)** — how teams separate UI, API, and data.
+
 **Time:** ~30 minutes first run (indexing dominates; ~15 min for step 4 alone).
 
 ---
@@ -167,10 +169,36 @@ Type `quit` to exit.
 
 ---
 
-## Step 7 — REST API (optional)
+## Step 7 — Full stack (recommended)
+
+Industry pattern: static UI talks to API over HTTP.
 
 ```powershell
-uvicorn src.api.main:app --reload
+docker compose up -d --build
+```
+
+| Service | URL |
+|---------|-----|
+| UI | http://localhost:8080 |
+| API docs | http://localhost:8000/docs |
+
+Or use the dev helper:
+
+```powershell
+.\scripts\dev.ps1 up
+```
+
+Keep **Ollama** running on your machine.
+
+---
+
+## Step 8 — API dev mode (optional)
+
+When editing backend code, use hot reload:
+
+```powershell
+.\scripts\dev.ps1 api
+# or: uvicorn src.api.main:app --reload
 ```
 
 - Swagger UI: [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)
@@ -179,7 +207,7 @@ uvicorn src.api.main:app --reload
 
 ---
 
-## Step 8 — Evaluation (optional)
+## Step 9 — Evaluation (optional)
 
 Measure quality with RAGAS:
 
@@ -231,6 +259,7 @@ Doc repos in `data/raw/` can be reused — skip `01` if still present.
 
 ## Next steps
 
+- **[OPERATIONS.md](OPERATIONS.md)** — how teams run UI + API + CI
 - [LEARNING_PATH.md](LEARNING_PATH.md) — what each script teaches
 - [ARCHITECTURE.md](ARCHITECTURE.md) — system design
-- [ROADMAP.md](ROADMAP.md) — Week 3 UI and deployment
+- [ROADMAP.md](ROADMAP.md) — deploy API to cloud (Week 4)

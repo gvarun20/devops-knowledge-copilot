@@ -1,3 +1,17 @@
+# DevOps Knowledge Copilot — standard 3-tier local stack
+#
+# Industry pattern:
+#   ui (static) → api (FastAPI) → qdrant (vector DB)
+#   LLM (Ollama) runs on the host — same as many teams using external model APIs
+#
+# Usage:
+#   docker compose up -d              # qdrant + api + ui
+#   docker compose logs -f api
+#
+# Prerequisites:
+#   1. Index built on host: python scripts/04_index.py
+#   2. Ollama running on host: ollama pull llama3.2:3b
+
 name: devops-knowledge-copilot
 
 services:
@@ -10,5 +24,39 @@ services:
       - qdrant_data:/qdrant/storage
     restart: unless-stopped
 
+  api:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.api
+    container_name: devops-copilot-api
+    ports:
+      - "8000:8000"
+    environment:
+      QDRANT_HOST: qdrant
+      QDRANT_PORT: "6333"
+      # Ollama on host machine (Docker Desktop: host.docker.internal)
+      OLLAMA_HOST: http://host.docker.internal:11434
+    volumes:
+      - ./data/index:/app/data/index:ro
+      - ./config:/app/config:ro
+      - model_cache:/root/.cache
+    depends_on:
+      - qdrant
+    restart: unless-stopped
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  ui:
+    image: nginx:alpine
+    container_name: devops-copilot-ui
+    ports:
+      - "8080:80"
+    volumes:
+      - ./docs:/usr/share/nginx/html:ro
+    depends_on:
+      - api
+    restart: unless-stopped
+
 volumes:
   qdrant_data:
+  model_cache:

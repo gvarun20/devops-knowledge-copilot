@@ -12,11 +12,13 @@ data/index/
 
 # Models cache
 .cache/
+.huggingface/
 
 # IDE / tooling (keep local only)
 .idea/
 .cursor/
 .pytest_cache/
+.streamlit/
 
 # OS
 .DS_Store

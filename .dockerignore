@@ -1,0 +1,23 @@
+# Dependencies
+.venv/
+.git/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.cursor/
+
+# Large / generated (mount as volumes, do not bake into image)
+data/raw/
+data/processed/
+data/chunks/
+.cache/
+
+# Secrets
+.env
+
+# Docs site (served by separate nginx container)
+docs/
+
+# Tests & eval (not needed in runtime image)
+tests/
+evaluation/
