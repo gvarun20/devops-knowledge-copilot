@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DevOps Knowledge Copilot</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #f4f6f9; --surface: #fff; --border: #e2e8f0;
+      --text: #1e293b; --muted: #64748b; --accent: #0d9488;
+      --accent2: #0891b2; --k8s: #2563eb; --tf: #9333ea;
+      --green: #16a34a; --red: #dc2626; --user-bg: #ecfdf5; --user-border: #99f6e4;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: "DM Sans", system-ui, sans-serif;
+      background: linear-gradient(180deg, var(--bg), #eef2f7);
+      color: var(--text); min-height: 100vh; line-height: 1.5;
+    }
+    .wrap { max-width: 720px; margin: 0 auto; padding: 1.5rem 1rem 3rem; }
+    .hero { text-align: center; padding: 1.5rem 0 1.25rem; }
+    .logo {
+      width: 52px; height: 52px; margin: 0 auto 0.75rem;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      border-radius: 14px; display: flex; align-items: center; justify-content: center;
+      font-size: 1.5rem; box-shadow: 0 8px 20px rgba(13,148,136,.22);
+    }
+    .hero h1 { font-size: 1.65rem; letter-spacing: -.02em; margin-bottom: .35rem; }
+    .hero p { color: var(--muted); font-size: .95rem; max-width: 480px; margin: 0 auto; }
+    .pills { display: flex; flex-wrap: wrap; justify-content: center; gap: .4rem; margin-top: .85rem; }
+    .pill {
+      font-size: .7rem; font-weight: 600; padding: .28rem .65rem;
+      border-radius: 999px; border: 1px solid var(--border); background: var(--surface);
+    }
+    .pill.ok { background: #dcfce7; color: var(--green); border-color: #bbf7d0; }
+    .pill.bad { background: #fee2e2; color: var(--red); border-color: #fecaca; }
+    .pill.k8s { background: #dbeafe; color: var(--k8s); border: none; }
+    .pill.tf { background: #f3e8ff; color: var(--tf); border: none; }
+
+    .banner {
+      background: #fffbeb; border: 1px solid #fde68a; border-radius: 12px;
+      padding: .85rem 1rem; font-size: .85rem; color: #92400e; margin-bottom: 1rem;
+      display: none;
+    }
+    .banner.show { display: block; }
+
+    .settings {
+      background: var(--surface); border: 1px solid var(--border); border-radius: 14px;
+      padding: 1rem 1.1rem; margin-bottom: 1rem; font-size: .85rem;
+    }
+    .settings label { display: block; font-weight: 600; margin-bottom: .35rem; color: var(--muted); font-size: .72rem; text-transform: uppercase; letter-spacing: .06em; }
+    .settings input {
+      width: 100%; padding: .55rem .75rem; border: 1px solid var(--border);
+      border-radius: 8px; font: inherit; font-size: .88rem;
+      font-family: "JetBrains Mono", monospace;
+    }
+    .settings input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(13,148,136,.12); }
+    .settings .hint { color: var(--muted); font-size: .78rem; margin-top: .4rem; }
+
+    .card {
+      background: var(--surface); border: 1px solid var(--border); border-radius: 18px;
+      padding: 1.25rem; box-shadow: 0 4px 20px rgba(15,23,42,.05); margin-bottom: 1.25rem;
+    }
+    textarea {
+      width: 100%; min-height: 88px; padding: .85rem; border: 2px solid var(--border);
+      border-radius: 12px; font: inherit; font-size: .95rem; resize: vertical;
+    }
+    textarea:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(13,148,136,.12); }
+    .samples { display: flex; flex-wrap: wrap; gap: .4rem; margin: .75rem 0; }
+    .sample {
+      background: var(--bg); border: 1px solid var(--border); border-radius: 999px;
+      padding: .35rem .75rem; font-size: .78rem; cursor: pointer; color: var(--text);
+    }
+    .sample:hover { border-color: var(--accent); color: var(--accent); }
+    .actions { display: flex; gap: .5rem; margin-top: .75rem; }
+    .btn {
+      border: none; border-radius: 10px; padding: .65rem 1.25rem; font: inherit;
+      font-weight: 600; cursor: pointer; font-size: .9rem;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      color: #fff; box-shadow: 0 4px 12px rgba(13,148,136,.28);
+    }
+    .btn-primary:disabled { opacity: .55; cursor: not-allowed; }
+    .btn-ghost { background: var(--surface); border: 1px solid var(--border); color: var(--text); }
+
+    .bubble-user {
+      background: var(--user-bg); border: 1px solid var(--user-border);
+      border-radius: 14px 14px 4px 14px; padding: .9rem 1rem; margin-bottom: .75rem;
+    }
+    .bubble-user .lbl { font-size: .65rem; font-weight: 700; color: var(--accent); text-transform: uppercase; letter-spacing: .06em; }
+    .bubble-bot {
+      border: 1px solid var(--border); border-radius: 4px 14px 14px 14px;
+      padding: 1rem 1.1rem; margin-bottom: 1rem; background: var(--surface);
+    }
+    .bubble-bot .lbl { font-size: .65rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; }
+    .bubble-bot .meta { font-family: "JetBrains Mono", monospace; font-size: .72rem; color: var(--muted); margin: .35rem 0 .65rem; }
+    .answer-body { font-size: .92rem; line-height: 1.65; white-space: pre-wrap; }
+    .answer-body code { font-family: "JetBrains Mono", monospace; background: var(--bg); padding: .1rem .35rem; border-radius: 4px; font-size: .85em; }
+
+    .src-title { font-size: .72rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; margin: 1rem 0 .5rem; }
+    .src {
+      display: flex; gap: .65rem; align-items: flex-start; background: var(--bg);
+      border: 1px solid var(--border); border-left: 4px solid var(--accent);
+      border-radius: 10px; padding: .75rem .9rem; margin-bottom: .45rem; font-size: .85rem;
+    }
+    .src.k8s { border-left-color: var(--k8s); }
+    .src.tf { border-left-color: var(--tf); }
+    .src .num { font-family: "JetBrains Mono", monospace; color: var(--muted); font-size: .75rem; min-width: 1.2rem; }
+    .src a { color: var(--accent); font-weight: 600; text-decoration: none; white-space: nowrap; font-size: .78rem; }
+    .src .tag { font-size: .62rem; font-weight: 700; text-transform: uppercase; padding: .1rem .4rem; border-radius: 4px; display: inline-block; margin-bottom: .2rem; }
+    .src .tag.k8s { background: #dbeafe; color: var(--k8s); }
+    .src .tag.tf { background: #f3e8ff; color: var(--tf); }
+    .src .sec { color: var(--muted); font-size: .78rem; }
+
+    .empty { text-align: center; color: var(--muted); padding: 2rem 1rem; }
+    .spinner { display: none; text-align: center; color: var(--muted); padding: 1rem; font-size: .88rem; }
+    .spinner.show { display: block; }
+    footer { text-align: center; font-size: .8rem; color: var(--muted); margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+    footer a { color: var(--accent); font-weight: 600; text-decoration: none; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header class="hero">
+      <div class="logo">🛠️</div>
+      <h1>DevOps Knowledge Copilot</h1>
+      <p>Grounded answers from official Kubernetes &amp; Terraform documentation.</p>
+      <div class="pills">
+        <span class="pill" id="apiPill">Checking API…</span>
+        <span class="pill k8s">Kubernetes</span>
+        <span class="pill tf">Terraform</span>
+      </div>
+    </header>
+
+    <div class="banner" id="httpsBanner">
+      <strong>GitHub Pages is HTTPS.</strong> It cannot call <code>http://localhost</code> on your PC.
+      For local use: <code>docker compose up -d</code> then open <code>http://localhost:8080</code>
+      (or <code>.\scripts\dev.ps1 up</code> on Windows). For public demo, deploy API to Render/Railway and enter HTTPS URL below.
+    </div>
+
+    <div class="settings">
+      <label for="apiUrl">API base URL</label>
+      <input type="url" id="apiUrl" placeholder="http://127.0.0.1:8000" />
+      <p class="hint">Saved in your browser. Local API: <code>docker compose up</code> or <code>.\scripts\dev.ps1 api</code></p>
+    </div>
+
+    <div class="card">
+      <textarea id="question" placeholder="Ask about Kubernetes or Terraform…"></textarea>
+      <div class="samples" id="samples"></div>
+      <div class="actions">
+        <button class="btn btn-primary" id="askBtn">Get answer →</button>
+        <button class="btn btn-ghost" id="clearBtn">Clear</button>
+      </div>
+      <div class="spinner" id="spinner">Searching docs &amp; generating answer… (1–2 min first time)</div>
+    </div>
+
+    <div id="chat"></div>
+    <div class="empty" id="empty">Ask a question or pick a sample above.</div>
+
+    <footer>
+      <a href="https://github.com/gvarun20/devops-knowledge-copilot" target="_blank">GitHub</a>
+      · Hosted on GitHub Pages · API runs separately
+    </footer>
+  </div>
+
+  <script>
+    const SAMPLES = [
+      "How do I create a Kubernetes Deployment?",
+      "What is a Terraform remote backend?",
+      "How do Kubernetes liveness probes work?",
+      "Terraform lifecycle ignore_changes",
+      "How do I use terraform import?",
+    ];
+    const DEFAULT_API = "http://127.0.0.1:8000";
+    const apiInput = document.getElementById("apiUrl");
+    const apiPill = document.getElementById("apiPill");
+    const httpsBanner = document.getElementById("httpsBanner");
+
+    function getApi() {
+      return (apiInput.value || localStorage.getItem("copilot_api") || DEFAULT_API).replace(/\/$/, "");
+    }
+    function saveApi() {
+      localStorage.setItem("copilot_api", getApi());
+    }
+    apiInput.value = localStorage.getItem("copilot_api") || DEFAULT_API;
+    apiInput.addEventListener("change", () => { saveApi(); checkHealth(); });
+
+    if (location.protocol === "https:") httpsBanner.classList.add("show");
+
+    const samplesEl = document.getElementById("samples");
+    SAMPLES.forEach(q => {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.className = "sample";
+      b.textContent = q.length > 42 ? q.slice(0, 42) + "…" : q;
+      b.title = q;
+      b.onclick = () => { document.getElementById("question").value = q; ask(); };
+      samplesEl.appendChild(b);
+    });
+
+    async function checkHealth() {
+      saveApi();
+      try {
+        const r = await fetch(getApi() + "/health", { method: "GET" });
+        if (r.ok) {
+          apiPill.textContent = "API online";
+          apiPill.className = "pill ok";
+          return true;
+        }
+      } catch (e) { /* offline */ }
+      apiPill.textContent = "API offline";
+      apiPill.className = "pill bad";
+      return false;
+    }
+
+    function esc(s) {
+      const d = document.createElement("div");
+      d.textContent = s;
+      return d.innerHTML;
+    }
+
+    function renderSources(sources) {
+      if (!sources || !sources.length) return "";
+      let html = '<div class="src-title">Documentation sources</div>';
+      sources.forEach(s => {
+        const k8s = s.tool === "kubernetes";
+        html += `<div class="src ${k8s ? "k8s" : "tf"}">
+          <span class="num">${s.rank}</span>
+          <div style="flex:1">
+            <span class="tag ${k8s ? "k8s" : "tf"}">${k8s ? "Kubernetes" : "Terraform"}</span>
+            <div><strong>${esc(s.document_title)}</strong></div>
+            <div class="sec">${esc(s.section_header || "")}</div>
+          </div>
+          <a href="${esc(s.source_url)}" target="_blank" rel="noopener">Open ↗</a>
+        </div>`;
+      });
+      return html;
+    }
+
+    function addTurn(q, data) {
+      document.getElementById("empty").style.display = "none";
+      const chat = document.getElementById("chat");
+      const block = document.createElement("div");
+      block.innerHTML = `
+        <div class="bubble-user"><div class="lbl">You</div><div>${esc(q)}</div></div>
+        <div class="bubble-bot">
+          <div class="lbl">Copilot</div>
+          <div class="meta">${data.chunks_used} sources · ${(data.latency_ms / 1000).toFixed(1)}s</div>
+          <div class="answer-body">${esc(data.answer)}</div>
+        </div>
+        ${renderSources(data.sources)}
+        <hr style="border:none;border-top:1px solid var(--border);margin:1.25rem 0" />`;
+      chat.insertBefore(block, chat.firstChild);
+    }
+
+    async function ask() {
+      const q = document.getElementById("question").value.trim();
+      if (!q) return;
+      const btn = document.getElementById("askBtn");
+      const spin = document.getElementById("spinner");
+      btn.disabled = true;
+      spin.classList.add("show");
+      try {
+        const r = await fetch(getApi() + "/ask", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ question: q }),
+        });
+        if (!r.ok) {
+          const err = await r.text();
+          alert("API error " + r.status + ": " + err);
+          return;
+        }
+        const data = await r.json();
+        addTurn(q, data);
+        document.getElementById("question").value = "";
+      } catch (e) {
+        alert("Cannot reach API at " + getApi() + ".\\n\\nStart: uvicorn src.api.main:app --reload\\n\\nIf on GitHub Pages HTTPS, localhost will not work — deploy API or run UI locally.");
+      } finally {
+        btn.disabled = false;
+        spin.classList.remove("show");
+        checkHealth();
+      }
+    }
+
+    document.getElementById("askBtn").onclick = ask;
+    document.getElementById("clearBtn").onclick = () => {
+      document.getElementById("chat").innerHTML = "";
+      document.getElementById("empty").style.display = "block";
+    };
+    document.getElementById("question").addEventListener("keydown", e => {
+      if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) ask();
+    });
+
+    checkHealth();
+    setInterval(checkHealth, 15000);
+  </script>
+</body>
+</html>
