@@ -3,6 +3,8 @@
 This project uses **Ollama** for answer generation and RAGAS evaluation.
 Embeddings and reranking stay **local** (same as Week 1).
 
+Full walkthrough from zero → [GETTING_STARTED.md](GETTING_STARTED.md)
+
 ## 1. Install Ollama
 
 Download and install: https://ollama.com

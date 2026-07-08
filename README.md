@@ -1,166 +1,293 @@
 # DevOps Knowledge Copilot
 
-A **learning project** that builds a production-style RAG system over official **Kubernetes** and **Terraform** documentation — grounded answers with citations, not guesswork.
+A **portfolio-grade RAG system** over official **Kubernetes** and **Terraform** documentation. It retrieves the right doc sections first, then generates **grounded answers with citations** — and says **"I don't know"** when the docs do not cover the question.
 
 **Repository:** [github.com/gvarun20/devops-knowledge-copilot](https://github.com/gvarun20/devops-knowledge-copilot)
 
 ---
 
-## Why this project?
+## What you get
 
-DevOps docs are huge and version-specific. Generic chatbots hallucinate syntax. This system retrieves the **exact doc sections** first, then generates answers only from that context — and says **"I don't know"** when the docs don't cover it.
+| Capability | Description |
+|------------|-------------|
+| **Hybrid retrieval** | Semantic (Qdrant) + keyword (BM25) + RRF fusion + cross-encoder rerank |
+| **Header-aware chunking** | Chunks follow doc structure, not arbitrary text splits |
+| **Cited answers** | LLM answers only from retrieved context with source URLs |
+| **Evaluation** | RAGAS metrics + ablation study across retrieval modes |
+| **REST API** | FastAPI `POST /ask` and `GET /health` |
+| **Zero API cost** | Local embeddings, reranker, and Ollama LLM |
 
-Full rationale → [docs/PROJECT_OVERVIEW.md](docs/PROJECT_OVERVIEW.md)
+**Scale (typical run):** ~1,651 documents → ~10,961 chunks → top 5 sources per question.
 
 ---
 
-## Current status
+## Project status
 
 | Week | Focus | Status |
 |------|-------|--------|
-| **1** | Retrieval pipeline | **Done** |
-| **2** | LLM answers + RAGAS eval + API | **In progress** |
-| **3** | UI + deploy + CI | Upcoming |
-| **4** | Monitoring + portfolio polish | Upcoming |
+| **1** | Ingest, chunk, index, hybrid retrieval | **Complete** |
+| **2** | LLM generation, RAGAS eval, ablation, API | **Built** — run eval to finish |
+| **3** | Chat UI, full Docker stack, public deploy | Planned |
+| **4** | Monitoring, CI, portfolio polish | Planned |
 
-### Week 1 at a glance
+---
 
-~**1,651** documents → ~**10,961** chunks → hybrid search → **top 5 cited chunks**
+## Prerequisites
 
-Details → [docs/WEEK1_SUMMARY.md](docs/WEEK1_SUMMARY.md)
+| Tool | Purpose |
+|------|---------|
+| Python 3.11+ | Pipeline and API |
+| Git | Clone official doc repos |
+| Docker Desktop | Qdrant vector database |
+| [Ollama](https://ollama.com) | Local LLM for answers and evaluation |
 
 ---
 
 ## Quick start
 
-**Requirements:** Python 3.11+, Git, Docker Desktop
+### 1. Clone and install
 
 ```powershell
+git clone https://github.com/gvarun20/devops-knowledge-copilot.git
+cd devops-knowledge-copilot
+
 py -3 -m venv .venv
 .\.venv\Scripts\Activate.ps1
 pip install -r requirements.txt
+```
+
+### 2. Start Qdrant
+
+```powershell
 docker compose up -d
 ```
 
-**Run pipeline (in order):**
+### 3. Build the index (Week 1 — first run ~15 min)
 
 ```powershell
 python scripts/01_setup_data.py
 python scripts/02_ingest.py
 python scripts/03_chunk.py
-python scripts/04_index.py      # ~15 min first run
-python scripts/05_query.py -i   # interactive retrieval test
+python scripts/04_index.py
 ```
 
-### Week 2 — generation & API (free / local)
+### 4. Set up Ollama (Week 2 — free, no API key)
 
-Uses **Ollama** — no paid GPT required. Full guide → [docs/FREE_SETUP.md](docs/FREE_SETUP.md)
+Install Ollama from [ollama.com](https://ollama.com), keep the app running, then:
 
 ```powershell
-# 1. Install Ollama from https://ollama.com
 ollama pull llama3.2:3b
-
-pip install -r requirements.txt
 python scripts/00_check_ollama.py
-python scripts/06_ask.py "How do I create a Kubernetes Deployment?"
-python scripts/06_ask.py -i
-python scripts/07_evaluate.py --limit 5
-python scripts/08_ablation.py --limit 5
-uvicorn src.api.main:app --reload
 ```
 
-API: `POST http://127.0.0.1:8000/ask` with body `{"question": "..."}`
+Full Ollama guide → [docs/FREE_SETUP.md](docs/FREE_SETUP.md)
+
+### 5. Ask a question
+
+```powershell
+python scripts/06_ask.py "How do I create a Kubernetes Deployment?"
+python scripts/06_ask.py -i
+```
+
+**Example output:** answer with `kubectl create deployment ...` plus 5 Kubernetes doc links.
 
 ---
 
 ## How it works
 
 ```
-Docs → parse → chunk → embed → hybrid search → rerank → top 5 chunks
-                                              ↓ (Week 2)
-                                    LLM answer + citations
+Official docs (GitHub)
+    → parse & clean
+    → header-aware chunks
+    → embed + index (Qdrant + BM25)
+    → hybrid search + rerank
+    → top 5 chunks
+    → Ollama LLM (strict prompt)
+    → answer + citations
 ```
 
-Architecture diagram → [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
+Architecture diagrams → [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
+
+---
+
+## Scripts reference
+
+| Script | Purpose |
+|--------|---------|
+| `00_check_ollama.py` | Verify Ollama is running and model is pulled |
+| `01_setup_data.py` | Sparse-clone K8s + Terraform doc repos |
+| `02_ingest.py` | Parse Markdown/MDX → `documents.jsonl` |
+| `03_chunk.py` | Header-aware chunking → `chunks.jsonl` |
+| `04_index.py` | Embeddings + Qdrant + BM25 index |
+| `05_query.py` | Retrieval-only test (no LLM) |
+| `06_ask.py` | Full RAG: question → cited answer |
+| `07_evaluate.py` | RAGAS evaluation on 38 test questions |
+| `08_ablation.py` | Compare semantic / hybrid / full pipeline |
+
+Step-by-step learning guide → [docs/LEARNING_PATH.md](docs/LEARNING_PATH.md)
+
+---
+
+## REST API
+
+Start the server:
+
+```powershell
+uvicorn src.api.main:app --reload
+```
+
+Open interactive docs: [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)
+
+**Health check:**
+
+```powershell
+curl http://127.0.0.1:8000/health
+```
+
+**Ask a question:**
+
+```powershell
+curl -X POST http://127.0.0.1:8000/ask `
+  -H "Content-Type: application/json" `
+  -d "{\"question\": \"What is a Terraform remote backend?\"}"
+```
+
+Response includes `answer`, `sources`, `latency_ms`, and `chunks_used`.
+
+---
+
+## Evaluation
+
+Run RAGAS metrics (faithfulness, answer relevancy, context precision/recall):
+
+```powershell
+# Quick test (5 questions)
+python scripts/07_evaluate.py --limit 5
+
+# Full eval set (38 questions — slow on local LLM)
+python scripts/07_evaluate.py --mode full
+
+# Ablation: semantic vs hybrid vs full pipeline
+python scripts/08_ablation.py --limit 10
+```
+
+Results are saved to `evaluation/results/`. Record scores in [docs/EVAL_RESULTS.md](docs/EVAL_RESULTS.md).
 
 ---
 
 ## Tech stack
 
-| Layer | Technology | Why |
-|-------|------------|-----|
-| Embeddings | `all-MiniLM-L6-v2` | Free, local, reproducible |
-| Vector DB | Qdrant (Docker) | Real vector store, hybrid-ready |
-| Keyword | BM25 | Catches exact terms embeddings miss |
-| Fusion | Reciprocal Rank Fusion | Simple, proven merge |
-| Reranker | `ms-marco-MiniLM-L-6-v2` | Reorders top 20 → top 5 |
-| LLM (Week 2) | **Ollama** `llama3.2:3b` (free, local) | No API key; optional OpenAI in config |
+| Layer | Technology | Notes |
+|-------|------------|-------|
+| Doc sources | [kubernetes/website](https://github.com/kubernetes/website), [hashicorp/web-unified-docs](https://github.com/hashicorp/web-unified-docs) | Official, versioned |
+| Embeddings | `all-MiniLM-L6-v2` | Local, free |
+| Vector DB | Qdrant (`qdrant/qdrant:v1.13.2`) | Docker on port 6333 |
+| Keyword search | BM25 | Exact term matching |
+| Fusion | Reciprocal Rank Fusion (k=60) | Merges semantic + keyword |
+| Reranker | `ms-marco-MiniLM-L-6-v2` | Top 20 → top 5 |
+| LLM | Ollama `llama3.2:3b` | Free/local; optional OpenAI |
+| API | FastAPI + Uvicorn | `src/api/` |
+| Evaluation | RAGAS | Ollama + local embeddings |
 
-Chunking design → [docs/CHUNKING.md](docs/CHUNKING.md)
+Chunking rationale → [docs/CHUNKING.md](docs/CHUNKING.md)
+
+---
+
+## Configuration
+
+All tunables live in `config/settings.yaml`:
+
+```yaml
+generation:
+  provider: ollama          # or openai
+  model: llama3.2:3b
+  base_url: http://localhost:11434/v1
+```
+
+Optional OpenAI: set `provider: openai`, add `OPENAI_API_KEY` to `.env` (see `.env.example`).
 
 ---
 
 ## Project structure
 
 ```
-config/settings.yaml       # all tunables
-scripts/01–08_*.py         # pipeline + Week 2 tools
+config/settings.yaml          # All pipeline settings
+scripts/00–08_*.py            # Setup, pipeline, RAG, eval
 src/
-  ingest/                  # clone + parse docs
-  chunking/                # header-aware splitter
-  indexing/                # embeddings, Qdrant, BM25
-  retrieval/               # hybrid + RRF + reranker
-  generation/              # LLM prompts + answers
-  rag/                     # retrieve + generate
-  api/                     # FastAPI
-  evaluation/              # RAGAS runner
-docs/                      # project documentation
+  ingest/                     # Git clone + doc parsing
+  chunking/                   # Header-aware splitter
+  indexing/                   # Embeddings, Qdrant, BM25
+  retrieval/                  # Hybrid search + rerank
+  generation/                 # Prompts + LLM client
+  rag/                        # End-to-end RAG pipeline
+  api/                        # FastAPI routes
+  evaluation/                 # RAGAS runner
+docs/                         # Project documentation
 evaluation/
-  questions.jsonl          # eval dataset
-  results/                 # saved metrics
-data/                      # generated locally (gitignored)
-docker-compose.yml         # Qdrant
+  questions.jsonl             # 38 hand-written eval questions
+  results/                    # Saved metric JSON
+data/                         # Generated locally (gitignored)
+docker-compose.yml            # Qdrant service
 ```
+
+Generated data (`data/raw/`, `data/processed/`, `data/chunks/`, `data/index/`) is not committed. Rebuild with scripts `01–04`.
 
 ---
 
 ## Documentation
 
-| Doc | Contents |
-|-----|----------|
-| [PROJECT_OVERVIEW.md](docs/PROJECT_OVERVIEW.md) | Why we built this, design principles |
-| [WEEK1_SUMMARY.md](docs/WEEK1_SUMMARY.md) | Achievements, metrics, decisions |
-| [WEEK2_PLAN.md](docs/WEEK2_PLAN.md) | Day-by-day Week 2 build plan |
-| [ARCHITECTURE.md](docs/ARCHITECTURE.md) | System diagrams + module map |
-| [LEARNING_PATH.md](docs/LEARNING_PATH.md) | Week 1 script guide |
-| [FREE_SETUP.md](docs/FREE_SETUP.md) | Free Ollama setup (no paid API) |
-| [CHUNKING.md](docs/CHUNKING.md) | Chunking rationale |
-| [EVAL_RESULTS.md](docs/EVAL_RESULTS.md) | Template for your scores |
+| Document | Description |
+|----------|-------------|
+| [GETTING_STARTED.md](docs/GETTING_STARTED.md) | Full setup walkthrough from zero |
+| [PROJECT_OVERVIEW.md](docs/PROJECT_OVERVIEW.md) | Problem, audience, design principles |
+| [ARCHITECTURE.md](docs/ARCHITECTURE.md) | System diagrams and module map |
+| [LEARNING_PATH.md](docs/LEARNING_PATH.md) | What each script teaches |
+| [WEEK1_SUMMARY.md](docs/WEEK1_SUMMARY.md) | Week 1 achievements and metrics |
+| [WEEK2_PLAN.md](docs/WEEK2_PLAN.md) | Week 2 milestones and checklist |
+| [FREE_SETUP.md](docs/FREE_SETUP.md) | Ollama install and model options |
+| [CHUNKING.md](docs/CHUNKING.md) | Why header-aware chunking |
+| [EVAL_RESULTS.md](docs/EVAL_RESULTS.md) | Template for your RAGAS scores |
+| [ROADMAP.md](docs/ROADMAP.md) | Week 3–4 plan |
 
 ---
 
-## Git workflow
+## Roadmap (brief)
 
-Commit from **your VS Code terminal** (keeps you as sole contributor):
+| Week | Goals |
+|------|-------|
+| **3** | Chat UI, Docker Compose for API + Qdrant, deploy to Render/Railway, GitHub Actions CI |
+| **4** | Logging/monitoring, README demo, interview prep doc, optional query rewriting |
+
+Details → [docs/ROADMAP.md](docs/ROADMAP.md)
+
+---
+
+## Portfolio talking points
+
+- **Why hybrid retrieval?** Semantic search misses exact syntax; BM25 misses paraphrases. RRF + reranking combines both.
+- **Why header-aware chunking?** Keeps doc sections intact → better citations and reranker input.
+- **How do you measure quality?** RAGAS faithfulness + ablation table comparing retrieval modes.
+- **How is data sourced?** Official GitHub repos — legal, reproducible, version-pinned (Terraform v1.9.x).
+- **Cost?** Entire stack runs free locally (embeddings, reranker, Qdrant, Ollama).
+
+---
+
+## Development
+
+```powershell
+pytest tests/
+```
+
+Commit from your own terminal to keep a clean GitHub contributor history:
 
 ```powershell
 git add .
-git commit -m "Week 1 RAG pipeline"   # keep under 30 chars
-git push
+git commit -m "Week 2 RAG + Ollama"
+git push origin main
 ```
-
----
-
-## What makes this portfolio-worthy
-
-- Measured retrieval quality (Week 2 RAGAS + ablation)
-- Hybrid search — not naive vector-only RAG
-- Legally clean data from official GitHub doc repos
-- Dockerized, reproducible pipeline
-- Documented engineering decisions you can explain in interviews
 
 ---
 
 ## License
 
-See [LICENSE](LICENSE) if present, or add one before public portfolio use.
+Add a [LICENSE](LICENSE) file before public portfolio use if not already present.

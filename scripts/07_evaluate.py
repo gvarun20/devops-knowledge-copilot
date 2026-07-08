@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""Run RAGAS evaluation (uses OpenAI API — costs apply)."""
+"""Run RAGAS evaluation (uses Ollama + local embeddings by default)."""
 
 import sys
 from pathlib import Path

@@ -43,5 +43,6 @@ Raw JSON saved to `evaluation/results/`.
 ## Notes
 
 - Evaluation uses **Ollama + local embeddings** (free; slower than cloud APIs).
+- Eval set has **38 questions** in `evaluation/questions.jsonl`.
 - Start with `--limit 5` on `07_evaluate.py` to test before full run.
 - Update this file after each run for your portfolio README.

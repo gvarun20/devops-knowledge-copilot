@@ -92,12 +92,7 @@ Use these in `05_query.py -i` to judge retrieval quality:
 
 ## What Week 1 does *not* include (by design)
 
-- LLM-generated answers
-- Evaluation metrics (RAGAS)
-- REST API or web UI
-- Public deployment
-
-Those are **Week 2–3**.
+Week 1 is retrieval only. Generation, evaluation, and API were added in **Week 2** — see [WEEK2_PLAN.md](WEEK2_PLAN.md).
 
 ---
 
