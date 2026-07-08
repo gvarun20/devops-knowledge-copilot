@@ -3,103 +3,135 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="RAG copilot over Kubernetes and Terraform docs — hybrid retrieval, RAGAS evaluation, FastAPI." />
   <title>DevOps Knowledge Copilot</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
   <style>
     :root {
-      --bg: #f4f6f9; --surface: #fff; --border: #e2e8f0;
-      --text: #1e293b; --muted: #64748b; --accent: #0d9488;
-      --accent2: #0891b2; --k8s: #2563eb; --tf: #9333ea;
-      --green: #16a34a; --red: #dc2626; --user-bg: #ecfdf5; --user-border: #99f6e4;
+      --bg: #f8fafc; --surface: #fff; --border: #e2e8f0;
+      --text: #0f172a; --muted: #64748b;
+      --accent: #0d9488; --accent2: #0891b2;
+      --k8s: #2563eb; --tf: #9333ea;
+      --green: #16a34a; --red: #dc2626;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
     body {
       font-family: "DM Sans", system-ui, sans-serif;
-      background: linear-gradient(180deg, var(--bg), #eef2f7);
-      color: var(--text); min-height: 100vh; line-height: 1.5;
+      background: var(--bg); color: var(--text); line-height: 1.6;
     }
-    .wrap { max-width: 720px; margin: 0 auto; padding: 1.5rem 1rem 3rem; }
-    .hero { text-align: center; padding: 1.5rem 0 1.25rem; }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    /* Nav */
+    nav {
+      position: sticky; top: 0; z-index: 10;
+      background: rgba(255,255,255,.92); backdrop-filter: blur(8px);
+      border-bottom: 1px solid var(--border);
+      padding: .75rem 1.25rem;
+    }
+    nav .inner {
+      max-width: 960px; margin: 0 auto;
+      display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    nav .brand { font-weight: 700; font-size: .95rem; color: var(--text); text-decoration: none; }
+    nav .links { display: flex; gap: 1.25rem; font-size: .88rem; font-weight: 500; }
+    nav .links a { color: var(--muted); text-decoration: none; }
+    nav .links a:hover { color: var(--accent); text-decoration: none; }
+    nav .gh-btn {
+      background: var(--text); color: #fff !important; padding: .4rem .85rem;
+      border-radius: 8px; font-size: .82rem; font-weight: 600; text-decoration: none !important;
+    }
+    nav .gh-btn:hover { background: #334155; }
+
+    /* Layout */
+    .wrap { max-width: 960px; margin: 0 auto; padding: 0 1.25rem; }
+    section { padding: 3.5rem 0; }
+    section h2 {
+      font-size: 1.35rem; letter-spacing: -.02em; margin-bottom: .35rem;
+    }
+    section .sub { color: var(--muted); font-size: .95rem; margin-bottom: 1.75rem; max-width: 560px; }
+
+    /* Hero */
+    .hero {
+      text-align: center; padding: 4rem 0 3rem;
+      background: linear-gradient(180deg, #ecfdf5 0%, var(--bg) 100%);
+    }
     .logo {
-      width: 52px; height: 52px; margin: 0 auto 0.75rem;
+      width: 64px; height: 64px; margin: 0 auto 1rem;
       background: linear-gradient(135deg, var(--accent), var(--accent2));
-      border-radius: 14px; display: flex; align-items: center; justify-content: center;
-      font-size: 1.5rem; box-shadow: 0 8px 20px rgba(13,148,136,.22);
+      border-radius: 16px; display: flex; align-items: center; justify-content: center;
+      font-size: 1.75rem; box-shadow: 0 10px 28px rgba(13,148,136,.25);
     }
-    .hero h1 { font-size: 1.65rem; letter-spacing: -.02em; margin-bottom: .35rem; }
-    .hero p { color: var(--muted); font-size: .95rem; max-width: 480px; margin: 0 auto; }
-    .pills { display: flex; flex-wrap: wrap; justify-content: center; gap: .4rem; margin-top: .85rem; }
+    .hero h1 { font-size: clamp(1.75rem, 4vw, 2.35rem); letter-spacing: -.03em; margin-bottom: .5rem; }
+    .hero .lead { color: var(--muted); font-size: 1.05rem; max-width: 520px; margin: 0 auto 1.25rem; }
+    .pills { display: flex; flex-wrap: wrap; justify-content: center; gap: .45rem; margin-bottom: 1.5rem; }
     .pill {
-      font-size: .7rem; font-weight: 600; padding: .28rem .65rem;
+      font-size: .72rem; font-weight: 600; padding: .3rem .7rem;
       border-radius: 999px; border: 1px solid var(--border); background: var(--surface);
     }
-    .pill.ok { background: #dcfce7; color: var(--green); border-color: #bbf7d0; }
-    .pill.bad { background: #fee2e2; color: var(--red); border-color: #fecaca; }
     .pill.k8s { background: #dbeafe; color: var(--k8s); border: none; }
     .pill.tf { background: #f3e8ff; color: var(--tf); border: none; }
-
-    .banner {
-      background: #fffbeb; border: 1px solid #fde68a; border-radius: 12px;
-      padding: .85rem 1rem; font-size: .85rem; color: #92400e; margin-bottom: 1rem;
-      display: none;
-    }
-    .banner.show { display: block; }
-
-    .settings {
-      background: var(--surface); border: 1px solid var(--border); border-radius: 14px;
-      padding: 1rem 1.1rem; margin-bottom: 1rem; font-size: .85rem;
-    }
-    .settings label { display: block; font-weight: 600; margin-bottom: .35rem; color: var(--muted); font-size: .72rem; text-transform: uppercase; letter-spacing: .06em; }
-    .settings input {
-      width: 100%; padding: .55rem .75rem; border: 1px solid var(--border);
-      border-radius: 8px; font: inherit; font-size: .88rem;
-      font-family: "JetBrains Mono", monospace;
-    }
-    .settings input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(13,148,136,.12); }
-    .settings .hint { color: var(--muted); font-size: .78rem; margin-top: .4rem; }
-
-    .card {
-      background: var(--surface); border: 1px solid var(--border); border-radius: 18px;
-      padding: 1.25rem; box-shadow: 0 4px 20px rgba(15,23,42,.05); margin-bottom: 1.25rem;
-    }
-    textarea {
-      width: 100%; min-height: 88px; padding: .85rem; border: 2px solid var(--border);
-      border-radius: 12px; font: inherit; font-size: .95rem; resize: vertical;
-    }
-    textarea:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(13,148,136,.12); }
-    .samples { display: flex; flex-wrap: wrap; gap: .4rem; margin: .75rem 0; }
-    .sample {
-      background: var(--bg); border: 1px solid var(--border); border-radius: 999px;
-      padding: .35rem .75rem; font-size: .78rem; cursor: pointer; color: var(--text);
-    }
-    .sample:hover { border-color: var(--accent); color: var(--accent); }
-    .actions { display: flex; gap: .5rem; margin-top: .75rem; }
+    .pill.free { background: #dcfce7; color: var(--green); border: none; }
+    .hero-btns { display: flex; flex-wrap: wrap; justify-content: center; gap: .65rem; }
     .btn {
-      border: none; border-radius: 10px; padding: .65rem 1.25rem; font: inherit;
-      font-weight: 600; cursor: pointer; font-size: .9rem;
+      display: inline-flex; align-items: center; gap: .35rem;
+      border: none; border-radius: 10px; padding: .7rem 1.35rem;
+      font: inherit; font-weight: 600; cursor: pointer; font-size: .92rem;
+      text-decoration: none !important;
     }
     .btn-primary {
       background: linear-gradient(135deg, var(--accent), var(--accent2));
-      color: #fff; box-shadow: 0 4px 12px rgba(13,148,136,.28);
+      color: #fff; box-shadow: 0 4px 14px rgba(13,148,136,.3);
     }
-    .btn-primary:disabled { opacity: .55; cursor: not-allowed; }
-    .btn-ghost { background: var(--surface); border: 1px solid var(--border); color: var(--text); }
+    .btn-outline {
+      background: var(--surface); border: 1px solid var(--border); color: var(--text);
+    }
+    .btn-outline:hover { border-color: var(--accent); color: var(--accent); }
 
-    .bubble-user {
-      background: var(--user-bg); border: 1px solid var(--user-border);
-      border-radius: 14px 14px 4px 14px; padding: .9rem 1rem; margin-bottom: .75rem;
+    /* Cards grid */
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1rem; }
+    .card {
+      background: var(--surface); border: 1px solid var(--border); border-radius: 14px;
+      padding: 1.25rem 1.35rem;
     }
-    .bubble-user .lbl { font-size: .65rem; font-weight: 700; color: var(--accent); text-transform: uppercase; letter-spacing: .06em; }
+    .card h3 { font-size: 1rem; margin-bottom: .4rem; }
+    .card p { color: var(--muted); font-size: .88rem; }
+
+    /* Metrics */
+    .metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 1rem; }
+    .metric {
+      background: var(--surface); border: 1px solid var(--border); border-radius: 14px;
+      padding: 1.25rem; text-align: center;
+    }
+    .metric .val { font-size: 1.75rem; font-weight: 700; color: var(--accent); }
+    .metric .lbl { font-size: .78rem; color: var(--muted); margin-top: .25rem; }
+
+    /* Demo / chat bubbles */
+    .demo-box {
+      background: var(--surface); border: 1px solid var(--border); border-radius: 16px;
+      padding: 1.35rem; box-shadow: 0 4px 24px rgba(15,23,42,.04);
+    }
+    .demo-label {
+      font-size: .68rem; font-weight: 700; color: var(--muted);
+      text-transform: uppercase; letter-spacing: .08em; margin-bottom: 1rem;
+    }
+    .bubble-user {
+      background: #ecfdf5; border: 1px solid #99f6e4;
+      border-radius: 14px 14px 4px 14px; padding: .85rem 1rem; margin-bottom: .75rem;
+    }
+    .bubble-user .lbl { font-size: .65rem; font-weight: 700; color: var(--accent); text-transform: uppercase; }
     .bubble-bot {
       border: 1px solid var(--border); border-radius: 4px 14px 14px 14px;
-      padding: 1rem 1.1rem; margin-bottom: 1rem; background: var(--surface);
+      padding: 1rem 1.1rem; margin-bottom: .75rem;
     }
-    .bubble-bot .lbl { font-size: .65rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; }
-    .bubble-bot .meta { font-family: "JetBrains Mono", monospace; font-size: .72rem; color: var(--muted); margin: .35rem 0 .65rem; }
-    .answer-body { font-size: .92rem; line-height: 1.65; white-space: pre-wrap; }
-    .answer-body code { font-family: "JetBrains Mono", monospace; background: var(--bg); padding: .1rem .35rem; border-radius: 4px; font-size: .85em; }
-
+    .bubble-bot .lbl { font-size: .65rem; font-weight: 700; color: var(--muted); text-transform: uppercase; }
+    .answer-body { font-size: .9rem; line-height: 1.65; white-space: pre-wrap; }
+    .answer-body code {
+      font-family: "JetBrains Mono", monospace; background: var(--bg);
+      padding: .1rem .35rem; border-radius: 4px; font-size: .85em;
+    }
     .src-title { font-size: .72rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; margin: 1rem 0 .5rem; }
     .src {
       display: flex; gap: .65rem; align-items: flex-start; background: var(--bg);
@@ -107,113 +139,246 @@
       border-radius: 10px; padding: .75rem .9rem; margin-bottom: .45rem; font-size: .85rem;
     }
     .src.k8s { border-left-color: var(--k8s); }
-    .src.tf { border-left-color: var(--tf); }
-    .src .num { font-family: "JetBrains Mono", monospace; color: var(--muted); font-size: .75rem; min-width: 1.2rem; }
-    .src a { color: var(--accent); font-weight: 600; text-decoration: none; white-space: nowrap; font-size: .78rem; }
-    .src .tag { font-size: .62rem; font-weight: 700; text-transform: uppercase; padding: .1rem .4rem; border-radius: 4px; display: inline-block; margin-bottom: .2rem; }
-    .src .tag.k8s { background: #dbeafe; color: var(--k8s); }
-    .src .tag.tf { background: #f3e8ff; color: var(--tf); }
+    .src .tag { font-size: .62rem; font-weight: 700; text-transform: uppercase; padding: .1rem .4rem; border-radius: 4px; background: #dbeafe; color: var(--k8s); }
     .src .sec { color: var(--muted); font-size: .78rem; }
 
-    .empty { text-align: center; color: var(--muted); padding: 2rem 1rem; }
-    .spinner { display: none; text-align: center; color: var(--muted); padding: 1rem; font-size: .88rem; }
+    /* Live chat section */
+    #liveChat { display: none; }
+    #liveChat.show { display: block; }
+    .hosted-note {
+      background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 14px;
+      padding: 1.25rem 1.35rem; font-size: .9rem; color: #1e40af;
+    }
+    .hosted-note code {
+      font-family: "JetBrains Mono", monospace; background: #fff;
+      padding: .15rem .4rem; border-radius: 4px; font-size: .82em;
+    }
+    .hosted-note ol { margin: .75rem 0 0 1.25rem; }
+    .hosted-note li { margin-bottom: .35rem; }
+
+    textarea {
+      width: 100%; min-height: 80px; padding: .85rem; border: 2px solid var(--border);
+      border-radius: 12px; font: inherit; font-size: .95rem; resize: vertical; margin-bottom: .75rem;
+    }
+    textarea:focus { outline: none; border-color: var(--accent); }
+    .samples { display: flex; flex-wrap: wrap; gap: .4rem; margin-bottom: .75rem; }
+    .sample {
+      background: var(--bg); border: 1px solid var(--border); border-radius: 999px;
+      padding: .35rem .75rem; font-size: .78rem; cursor: pointer;
+    }
+    .sample:hover { border-color: var(--accent); color: var(--accent); }
+    .pill.ok { background: #dcfce7; color: var(--green); }
+    .pill.bad { background: #fee2e2; color: var(--red); }
+    .spinner { display: none; text-align: center; color: var(--muted); padding: .75rem; font-size: .88rem; }
     .spinner.show { display: block; }
-    footer { text-align: center; font-size: .8rem; color: var(--muted); margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--border); }
-    footer a { color: var(--accent); font-weight: 600; text-decoration: none; }
+
+    /* Stack tags */
+    .stack { display: flex; flex-wrap: wrap; gap: .5rem; }
+    .stack span {
+      background: var(--surface); border: 1px solid var(--border);
+      padding: .35rem .75rem; border-radius: 8px; font-size: .82rem; font-weight: 500;
+    }
+
+    /* Footer */
+    footer {
+      border-top: 1px solid var(--border); padding: 2rem 0 2.5rem;
+      text-align: center; color: var(--muted); font-size: .85rem;
+    }
+
+    @media (max-width: 600px) {
+      nav .links { display: none; }
+      section { padding: 2.5rem 0; }
+    }
   </style>
 </head>
 <body>
-  <div class="wrap">
-    <header class="hero">
+  <nav>
+    <div class="inner">
+      <a class="brand" href="#">🛠️ DevOps Copilot</a>
+      <div class="links">
+        <a href="#about">About</a>
+        <a href="#demo">Demo</a>
+        <a href="#metrics">Metrics</a>
+        <a href="#stack">Stack</a>
+      </div>
+      <a class="gh-btn" href="https://github.com/gvarun20/devops-knowledge-copilot" target="_blank" rel="noopener">GitHub ↗</a>
+    </div>
+  </nav>
+
+  <header class="hero">
+    <div class="wrap">
       <div class="logo">🛠️</div>
       <h1>DevOps Knowledge Copilot</h1>
-      <p>Grounded answers from official Kubernetes &amp; Terraform documentation.</p>
+      <p class="lead">Ask questions about Kubernetes &amp; Terraform — get grounded answers with links to official docs.</p>
       <div class="pills">
-        <span class="pill" id="apiPill">Checking API…</span>
+        <span class="pill free">$0 · 100% local</span>
         <span class="pill k8s">Kubernetes</span>
         <span class="pill tf">Terraform</span>
+        <span class="pill" id="apiPill">Portfolio project</span>
       </div>
-    </header>
-
-    <div class="banner" id="httpsBanner">
-      <strong>GitHub Pages is HTTPS.</strong> It cannot call <code>http://localhost</code> on your PC.
-      For local use: <code>docker compose up -d</code> then open <code>http://localhost:8080</code>
-      (or <code>.\scripts\dev.ps1 up</code> on Windows). For public demo, deploy API to Render/Railway and enter HTTPS URL below.
-    </div>
-
-    <div class="settings">
-      <label for="apiUrl">API base URL</label>
-      <input type="url" id="apiUrl" placeholder="http://127.0.0.1:8000" />
-      <p class="hint">Saved in your browser. Local API: <code>docker compose up</code> or <code>.\scripts\dev.ps1 api</code></p>
-    </div>
-
-    <div class="card">
-      <textarea id="question" placeholder="Ask about Kubernetes or Terraform…"></textarea>
-      <div class="samples" id="samples"></div>
-      <div class="actions">
-        <button class="btn btn-primary" id="askBtn">Get answer →</button>
-        <button class="btn btn-ghost" id="clearBtn">Clear</button>
+      <div class="hero-btns">
+        <a class="btn btn-primary" href="#demo">See demo ↓</a>
+        <a class="btn btn-outline" href="https://github.com/gvarun20/devops-knowledge-copilot" target="_blank" rel="noopener">View source code</a>
       </div>
-      <div class="spinner" id="spinner">Searching docs &amp; generating answer… (1–2 min first time)</div>
     </div>
+  </header>
 
-    <div id="chat"></div>
-    <div class="empty" id="empty">Ask a question or pick a sample above.</div>
+  <section id="about">
+    <div class="wrap">
+      <h2>What it does</h2>
+      <p class="sub">A retrieval-augmented generation (RAG) pipeline built as a portfolio project — not a paid product.</p>
+      <div class="grid">
+        <div class="card">
+          <h3>🔍 Hybrid retrieval</h3>
+          <p>Semantic search (Qdrant) + keyword search (BM25) merged with RRF, then reranked with a cross-encoder.</p>
+        </div>
+        <div class="card">
+          <h3>💬 Grounded answers</h3>
+          <p>Local LLM (Ollama) answers only from retrieved doc chunks — with title, section, and URL citations.</p>
+        </div>
+        <div class="card">
+          <h3>📊 Measured quality</h3>
+          <p>RAGAS evaluation on 38 questions. Ablation study proves hybrid beats vector-only retrieval.</p>
+        </div>
+      </div>
+    </div>
+  </section>
 
-    <footer>
-      <a href="https://github.com/gvarun20/devops-knowledge-copilot" target="_blank">GitHub</a>
-      · Hosted on GitHub Pages · API runs separately
-    </footer>
-  </div>
+  <section id="metrics" style="background:#fff;border-top:1px solid var(--border);border-bottom:1px solid var(--border)">
+    <div class="wrap">
+      <h2>Evaluation results</h2>
+      <p class="sub">RAGAS metrics on a held-out question set (Ollama llama3.2:3b, local embeddings).</p>
+      <div class="metrics">
+        <div class="metric"><div class="val">0.70</div><div class="lbl">Answer relevancy</div></div>
+        <div class="metric"><div class="val">0.47</div><div class="lbl">Context recall</div></div>
+        <div class="metric"><div class="val">0.89</div><div class="lbl">Hybrid relevancy<br><small style="font-weight:400">vs 0.41 semantic-only</small></div></div>
+        <div class="metric"><div class="val">~11k</div><div class="lbl">Doc chunks indexed</div></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="demo">
+    <div class="wrap">
+      <h2>Example answer</h2>
+      <p class="sub">Real output from the system — retrieved from official Kubernetes documentation.</p>
+      <div class="demo-box">
+        <div class="demo-label">Sample question</div>
+        <div class="bubble-user">
+          <div class="lbl">Question</div>
+          <div>How do I create a Kubernetes Deployment?</div>
+        </div>
+        <div class="bubble-bot">
+          <div class="lbl">Answer</div>
+          <div class="answer-body">To create a Deployment in Kubernetes, you define it in a YAML manifest and apply it with <code>kubectl</code>.
+
+Example:
+<code>kubectl apply -f https://k8s.io/examples/application/deployment.yaml</code>
+
+A Deployment manages ReplicaSets and ensures the desired number of Pod replicas are running. You can check status with:
+<code>kubectl get deployments</code>
+
+The Deployment controller handles rolling updates and rollbacks automatically.</div>
+        </div>
+        <div class="src-title">Sources (from retrieval)</div>
+        <div class="src k8s">
+          <div style="flex:1">
+            <span class="tag">Kubernetes</span>
+            <div><strong>Deployments</strong></div>
+            <div class="sec">Creating a Deployment</div>
+          </div>
+          <a href="https://kubernetes.io/docs/concepts/workloads/controllers/deployment/" target="_blank" rel="noopener">Open doc ↗</a>
+        </div>
+        <div class="src k8s">
+          <div style="flex:1">
+            <span class="tag">Kubernetes</span>
+            <div><strong>kubectl</strong></div>
+            <div class="sec">kubectl apply</div>
+          </div>
+          <a href="https://kubernetes.io/docs/reference/kubectl/generated/kubectl_apply/" target="_blank" rel="noopener">Open doc ↗</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="try">
+    <div class="wrap">
+      <h2>Try it live</h2>
+      <p class="sub" id="trySub">Run the stack on your machine — free, takes one setup.</p>
+
+      <div id="hostedNote" class="hosted-note">
+        <strong>This page is hosted on GitHub Pages.</strong> Live Q&amp;A runs on your laptop (API + Ollama).
+        <ol>
+          <li>Clone the <a href="https://github.com/gvarun20/devops-knowledge-copilot">repo</a></li>
+          <li>Build index once (see README)</li>
+          <li>Run <code>.\scripts\dev.ps1 api</code> then <code>.\scripts\dev.ps1 ui-local</code></li>
+          <li>Open <code>http://localhost:8080</code> and ask anything</li>
+        </ol>
+      </div>
+
+      <div id="liveChat" style="margin-top:1.25rem">
+        <div class="demo-box">
+          <textarea id="question" placeholder="Ask about Kubernetes or Terraform…"></textarea>
+          <div class="samples" id="samples"></div>
+          <div class="hero-btns">
+            <button class="btn btn-primary" id="askBtn">Get answer →</button>
+            <button class="btn btn-outline" id="clearBtn">Clear</button>
+          </div>
+          <div class="spinner" id="spinner">Searching docs &amp; generating… (1–2 min first time)</div>
+          <div id="chat" style="margin-top:1rem"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="stack">
+    <div class="wrap">
+      <h2>Tech stack</h2>
+      <p class="sub">Everything runs locally — no cloud bills.</p>
+      <div class="stack">
+        <span>Python</span><span>FastAPI</span><span>Qdrant</span><span>BM25</span>
+        <span>HuggingFace embeddings</span><span>Ollama</span><span>RAGAS</span>
+        <span>Docker</span><span>GitHub Actions</span>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="wrap">
+      Built by <a href="https://github.com/gvarun20">gvarun20</a>
+      · <a href="https://github.com/gvarun20/devops-knowledge-copilot">Source on GitHub</a>
+      · Hosted on GitHub Pages
+    </div>
+  </footer>
 
   <script>
     const SAMPLES = [
       "How do I create a Kubernetes Deployment?",
       "What is a Terraform remote backend?",
       "How do Kubernetes liveness probes work?",
-      "Terraform lifecycle ignore_changes",
-      "How do I use terraform import?",
     ];
     const DEFAULT_API = "http://127.0.0.1:8000";
-    const apiInput = document.getElementById("apiUrl");
-    const apiPill = document.getElementById("apiPill");
-    const httpsBanner = document.getElementById("httpsBanner");
+    const isLocal = location.hostname === "localhost" || location.hostname === "127.0.0.1";
+    const isGitHubPages = location.hostname.includes("github.io");
 
-    function getApi() {
-      return (apiInput.value || localStorage.getItem("copilot_api") || DEFAULT_API).replace(/\/$/, "");
+    if (isLocal) {
+      document.getElementById("hostedNote").style.display = "none";
+      document.getElementById("liveChat").classList.add("show");
+      document.getElementById("trySub").textContent = "API detected on localhost — ask a real question below.";
     }
-    function saveApi() {
-      localStorage.setItem("copilot_api", getApi());
-    }
-    apiInput.value = localStorage.getItem("copilot_api") || DEFAULT_API;
-    apiInput.addEventListener("change", () => { saveApi(); checkHealth(); });
-
-    if (location.protocol === "https:") httpsBanner.classList.add("show");
 
     const samplesEl = document.getElementById("samples");
     SAMPLES.forEach(q => {
       const b = document.createElement("button");
       b.type = "button";
       b.className = "sample";
-      b.textContent = q.length > 42 ? q.slice(0, 42) + "…" : q;
+      b.textContent = q.length > 40 ? q.slice(0, 40) + "…" : q;
       b.title = q;
-      b.onclick = () => { document.getElementById("question").value = q; ask(); };
+      b.onclick = () => { document.getElementById("question").value = q; if (isLocal) ask(); };
       samplesEl.appendChild(b);
     });
 
-    async function checkHealth() {
-      saveApi();
-      try {
-        const r = await fetch(getApi() + "/health", { method: "GET" });
-        if (r.ok) {
-          apiPill.textContent = "API online";
-          apiPill.className = "pill ok";
-          return true;
-        }
-      } catch (e) { /* offline */ }
-      apiPill.textContent = "API offline";
-      apiPill.className = "pill bad";
-      return false;
+    function getApi() {
+      return (localStorage.getItem("copilot_api") || DEFAULT_API).replace(/\/$/, "");
     }
 
     function esc(s) {
@@ -223,14 +388,13 @@
     }
 
     function renderSources(sources) {
-      if (!sources || !sources.length) return "";
+      if (!sources?.length) return "";
       let html = '<div class="src-title">Documentation sources</div>';
       sources.forEach(s => {
         const k8s = s.tool === "kubernetes";
-        html += `<div class="src ${k8s ? "k8s" : "tf"}">
-          <span class="num">${s.rank}</span>
+        html += `<div class="src ${k8s ? "k8s" : ""}">
           <div style="flex:1">
-            <span class="tag ${k8s ? "k8s" : "tf"}">${k8s ? "Kubernetes" : "Terraform"}</span>
+            <span class="tag">${k8s ? "Kubernetes" : "Terraform"}</span>
             <div><strong>${esc(s.document_title)}</strong></div>
             <div class="sec">${esc(s.section_header || "")}</div>
           </div>
@@ -240,20 +404,20 @@
       return html;
     }
 
-    function addTurn(q, data) {
-      document.getElementById("empty").style.display = "none";
-      const chat = document.getElementById("chat");
-      const block = document.createElement("div");
-      block.innerHTML = `
-        <div class="bubble-user"><div class="lbl">You</div><div>${esc(q)}</div></div>
-        <div class="bubble-bot">
-          <div class="lbl">Copilot</div>
-          <div class="meta">${data.chunks_used} sources · ${(data.latency_ms / 1000).toFixed(1)}s</div>
-          <div class="answer-body">${esc(data.answer)}</div>
-        </div>
-        ${renderSources(data.sources)}
-        <hr style="border:none;border-top:1px solid var(--border);margin:1.25rem 0" />`;
-      chat.insertBefore(block, chat.firstChild);
+    async function checkHealth() {
+      if (!isLocal) return false;
+      const pill = document.getElementById("apiPill");
+      try {
+        const r = await fetch(getApi() + "/health");
+        if (r.ok) {
+          pill.textContent = "API online";
+          pill.className = "pill ok";
+          return true;
+        }
+      } catch (e) { /* offline */ }
+      pill.textContent = "API offline — run dev.ps1 api";
+      pill.className = "pill bad";
+      return false;
     }
 
     async function ask() {
@@ -269,16 +433,22 @@
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ question: q }),
         });
-        if (!r.ok) {
-          const err = await r.text();
-          alert("API error " + r.status + ": " + err);
-          return;
-        }
+        if (!r.ok) throw new Error(await r.text());
         const data = await r.json();
-        addTurn(q, data);
+        const chat = document.getElementById("chat");
+        const block = document.createElement("div");
+        block.innerHTML = `
+          <div class="bubble-user"><div class="lbl">You</div><div>${esc(q)}</div></div>
+          <div class="bubble-bot">
+            <div class="lbl">Copilot · ${data.chunks_used} sources · ${(data.latency_ms/1000).toFixed(1)}s</div>
+            <div class="answer-body">${esc(data.answer)}</div>
+          </div>
+          ${renderSources(data.sources)}
+          <hr style="border:none;border-top:1px solid var(--border);margin:1.25rem 0" />`;
+        chat.insertBefore(block, chat.firstChild);
         document.getElementById("question").value = "";
       } catch (e) {
-        alert("Cannot reach API at " + getApi() + ".\\n\\nStart: uvicorn src.api.main:app --reload\\n\\nIf on GitHub Pages HTTPS, localhost will not work — deploy API or run UI locally.");
+        alert("Start the API first:\\n.\\scripts\\dev.ps1 api");
       } finally {
         btn.disabled = false;
         spin.classList.remove("show");
@@ -286,17 +456,12 @@
       }
     }
 
-    document.getElementById("askBtn").onclick = ask;
-    document.getElementById("clearBtn").onclick = () => {
-      document.getElementById("chat").innerHTML = "";
-      document.getElementById("empty").style.display = "block";
-    };
-    document.getElementById("question").addEventListener("keydown", e => {
-      if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) ask();
-    });
-
-    checkHealth();
-    setInterval(checkHealth, 15000);
+    if (isLocal) {
+      document.getElementById("askBtn").onclick = ask;
+      document.getElementById("clearBtn").onclick = () => { document.getElementById("chat").innerHTML = ""; };
+      checkHealth();
+      setInterval(checkHealth, 15000);
+    }
   </script>
 </body>
 </html>

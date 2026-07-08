@@ -1,41 +1,30 @@
-# Project roadmap
+# Status — portfolio project complete
 
-## Completed
+This project is **done for job-hunting purposes**. Everything below is built and free.
 
-### Week 1 — Retrieval pipeline ✅
-Sparse clone, chunk, index, hybrid search + rerank.
-
-### Week 2 — RAG + evaluation + API ✅
-Ollama generation, RAGAS eval, ablation, FastAPI `/ask`.
-
-### Week 3 — Industry-standard ops ✅
-- **Docker Compose:** Qdrant + API + nginx UI (`docker compose up`)
-- **Dockerfile** for API (`docker/Dockerfile.api`)
-- **Static UI** on GitHub Pages (`docs/index.html`)
-- **CI:** pytest on push (`.github/workflows/ci.yml`)
-- **12-factor config:** env vars override YAML
-- **Operations guide:** [OPERATIONS.md](OPERATIONS.md)
-- **Dev script:** `scripts/dev.ps1`
+| Done | What |
+|------|------|
+| ✅ | Retrieval pipeline (hybrid + rerank) |
+| ✅ | RAG + citations (Ollama) |
+| ✅ | RAGAS eval + ablation |
+| ✅ | FastAPI + static UI |
+| ✅ | Docker (Qdrant) + pytest CI |
+| ✅ | Docs + eval numbers for resume |
 
 ---
 
-## Week 4 — Cloud production (next)
+## Optional polish (only if you have time)
 
-| Task | Industry practice |
-|------|-------------------|
-| Deploy API to **Render** or **Railway** | HTTPS backend, health checks |
-| Point GitHub Pages UI to cloud API URL | Full public demo |
-| Optional: **Qdrant Cloud** | Managed vector DB |
-| Optional: **OpenAI** for 24/7 LLM | No dependency on laptop Ollama |
-| README demo GIF | Portfolio polish |
+| Task | Why |
+|------|-----|
+| Screen recording GIF in README | Recruiters who won't clone the repo |
+| Run eval on 10 questions | Stronger numbers in README |
+| Add MIT LICENSE file | Professional touch on GitHub |
 
-**Success:** One HTTPS UI link + one HTTPS API link on resume.
+**Skip:** cloud deploy, paid APIs, Kubernetes prod cluster — not needed for a portfolio demo.
 
 ---
 
-## Optional later
+## How to use this project
 
-- GitHub Actions: build & push Docker image
-- Staging environment
-- Prometheus metrics on `/health` + latency
-- Next.js frontend (if targeting frontend roles)
+→ **[PORTFOLIO.md](PORTFOLIO.md)** — resume bullets + interview demo script

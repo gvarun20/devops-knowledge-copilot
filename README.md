@@ -1,32 +1,42 @@
 # DevOps Knowledge Copilot
 
-RAG system over official **Kubernetes** and **Terraform** documentation — grounded answers with citations.
+**Portfolio project** — RAG over official Kubernetes & Terraform docs. Grounded answers with citations.
 
-**Repository:** [github.com/gvarun20/devops-knowledge-copilot](https://github.com/gvarun20/devops-knowledge-copilot)
+**Cost: $0** — Python, Docker (Qdrant only), Ollama, GitHub. No cloud, no API keys.
 
----
+**Repo:** [github.com/gvarun20/devops-knowledge-copilot](https://github.com/gvarun20/devops-knowledge-copilot)
 
-## How it is built (industry pattern)
-
-```
-Frontend (static UI)  →  Backend (FastAPI)  →  Qdrant + BM25 + LLM
-   GitHub Pages            Docker / uvicorn       Ollama (local)
-```
-
-| Layer | Technology | Role |
-|-------|------------|------|
-| **Frontend** | `docs/index.html` on GitHub Pages | User interface — refresh anytime |
-| **Backend** | FastAPI `POST /ask` | RAG logic — never in the browser |
-| **Data** | Qdrant + BM25 files | Hybrid retrieval |
-| **LLM** | Ollama (local) or OpenAI | Answer generation |
-
-Full operations guide → **[docs/OPERATIONS.md](docs/OPERATIONS.md)** (read this to learn the pro workflow)
+**Live site:** [gvarun20.github.io/devops-knowledge-copilot](https://gvarun20.github.io/devops-knowledge-copilot/)
 
 ---
 
-## Quick start (standard workflow)
+## For recruiters (30-second summary)
 
-### 1. Install
+Built a **hybrid RAG pipeline** (Qdrant + BM25 + reranker) over ~11k doc chunks. Measured with **RAGAS**: answer relevancy **0.70**, hybrid retrieval beats vector-only **0.41 → 0.89**. Exposed via **FastAPI** + static UI. All local, no paid services.
+
+Full interview script → **[docs/PORTFOLIO.md](docs/PORTFOLIO.md)**
+
+---
+
+## Demo in an interview (2 terminals)
+
+**Before the call:** index built once, Ollama running, `ollama pull llama3.2:3b`
+
+```powershell
+# Terminal 1 — start services + API
+.\scripts\dev.ps1 demo
+
+# Terminal 2 — chat UI in browser
+.\scripts\dev.ps1 ui-local
+```
+
+Open **http://localhost:8080** → ask: *"How do I create a Kubernetes Deployment?"*
+
+**Even simpler (no browser):** `python scripts/06_ask.py -i`
+
+---
+
+## First-time setup (one time, ~30 min)
 
 ```powershell
 git clone https://github.com/gvarun20/devops-knowledge-copilot.git
@@ -34,12 +44,7 @@ cd devops-knowledge-copilot
 py -3 -m venv .venv
 .\.venv\Scripts\Activate.ps1
 pip install -r requirements.txt
-copy .env.example .env
-```
 
-### 2. Build index (one time, ~15 min)
-
-```powershell
 docker compose up -d qdrant
 python scripts/01_setup_data.py
 python scripts/02_ingest.py
@@ -48,113 +53,74 @@ python scripts/04_index.py
 ollama pull llama3.2:3b
 ```
 
-### 3. Run full stack (one command — recommended)
-
-```powershell
-docker compose up -d --build
-```
-
-| Service | URL |
-|---------|-----|
-| **UI** | http://localhost:8080 |
-| **API** | http://localhost:8000/docs |
-| **Health** | http://localhost:8000/health |
-
-Keep **Ollama** running on your machine.
-
-### 4. Or: API dev mode (hot reload)
-
-```powershell
-.\scripts\dev.ps1 api
-```
+Details → [docs/GETTING_STARTED.md](docs/GETTING_STARTED.md)
 
 ---
 
-## Dev commands (`scripts/dev.ps1`)
+## What you built (resume bullets)
+
+- Hybrid retrieval (semantic + BM25 + RRF + cross-encoder rerank) over official K8s/Terraform docs
+- RAG pipeline with citation-backed answers via local LLM (Ollama)
+- RAGAS evaluation + ablation study with published metrics
+- FastAPI REST API (`/ask`, `/health`) + static chat UI
+- CI with pytest on every push
+
+---
+
+## Eval results
+
+| Metric | Score |
+|--------|-------|
+| answer_relevancy | 0.70 |
+| context_recall | 0.47 |
+| hybrid vs semantic-only (relevancy) | 0.41 → **0.89** |
+
+→ [docs/EVAL_RESULTS.md](docs/EVAL_RESULTS.md)
+
+---
+
+## Commands
 
 ```powershell
-.\scripts\dev.ps1 up        # Docker: Qdrant + API + UI
-.\scripts\dev.ps1 down      # Stop containers
-.\scripts\dev.ps1 api       # Local API with reload
-.\scripts\dev.ps1 test      # pytest (same as CI)
+.\scripts\dev.ps1 demo      # Start Qdrant + print demo steps
+.\scripts\dev.ps1 api       # API (terminal 1)
+.\scripts\dev.ps1 ui-local  # UI (terminal 2)
 .\scripts\dev.ps1 ask       # CLI chat
-.\scripts\dev.ps1 help      # All commands
+.\scripts\dev.ps1 test      # pytest
 ```
 
 ---
 
-## Public UI (GitHub Pages)
+## Stack (all free)
+
+| Piece | Tool |
+|-------|------|
+| Vector DB | Qdrant (Docker) |
+| Keyword search | BM25 (local file) |
+| Embeddings | HuggingFace (local) |
+| LLM | Ollama `llama3.2:3b` |
+| API | FastAPI |
+| UI | Static HTML (`docs/index.html`) |
+| Hosting | GitHub repo + **GitHub Pages** website |
+
+---
+
+## GitHub Pages website
 
 **https://gvarun20.github.io/devops-knowledge-copilot/**
 
-Deploys automatically on push to `main`. For answers, point the UI to a running **HTTPS API** (local API works with `docker compose up` + http://localhost:8080).
+Portfolio site with overview, metrics, and example answer. Enable: **Settings → Pages → GitHub Actions**.
+
+Live chat: run locally with `.\scripts\dev.ps1 ui-local`. Details → [docs/HOSTING.md](docs/HOSTING.md)
 
 ---
 
-## CI (runs on every push)
+## Docs
 
-- **Tests:** `pytest` via [.github/workflows/ci.yml](.github/workflows/ci.yml)
-- **UI deploy:** GitHub Pages via [.github/workflows/pages.yml](.github/workflows/pages.yml)
-
-Run locally before push: `pytest tests/ -q`
-
----
-
-## Evaluation results
-
-| Metric | Score (5 questions) |
-|--------|---------------------|
-| answer_relevancy | 0.70 |
-| context_recall | 0.47 |
-
-Ablation: hybrid retrieval **0.41 → 0.89** answer relevancy vs semantic-only.
-
-Details → [docs/EVAL_RESULTS.md](docs/EVAL_RESULTS.md)
-
----
-
-## Project structure
-
-```
-docker/Dockerfile.api       # API container (production pattern)
-docker-compose.yml          # Qdrant + API + nginx UI
-src/api/                    # FastAPI backend
-src/rag/                    # RAG pipeline
-docs/index.html             # Static frontend (GitHub Pages)
-scripts/01–08_*.py          # Data pipeline + eval
-scripts/dev.ps1             # Standard dev commands
-config/settings.yaml        # Defaults (+ env overrides)
-.github/workflows/          # CI + Pages
-```
-
-Streamlit (`scripts/09_ui.py`) is **optional** — for experiments only, not production.
-
----
-
-## Documentation
-
-| Doc | Purpose |
-|-----|---------|
-| **[OPERATIONS.md](docs/OPERATIONS.md)** | **How teams run this (start here)** |
-| [ARCHITECTURE.md](docs/ARCHITECTURE.md) | System design |
-| [HOSTING.md](docs/HOSTING.md) | GitHub Pages |
-| [GETTING_STARTED.md](docs/GETTING_STARTED.md) | First-time walkthrough |
-| [EVAL_RESULTS.md](docs/EVAL_RESULTS.md) | RAGAS scores |
-| [ROADMAP.md](docs/ROADMAP.md) | Deploy API to cloud (next) |
-
----
-
-## Status
-
-| Week | Focus | Status |
-|------|-------|--------|
-| 1 | Retrieval pipeline | Done |
-| 2 | RAG + eval + API | Done |
-| 3 | Docker stack + UI + CI | Done |
-| 4 | Cloud API deploy (Render) | Next |
-
----
-
-## License
-
-Add [LICENSE](LICENSE) before public portfolio use if not present.
+| Doc | When to read |
+|-----|--------------|
+| **[PORTFOLIO.md](docs/PORTFOLIO.md)** | **Before interviews** |
+| [HOSTING.md](docs/HOSTING.md) | Enable GitHub Pages |
+| [GETTING_STARTED.md](docs/GETTING_STARTED.md) | First setup |
+| [ARCHITECTURE.md](docs/ARCHITECTURE.md) | System design questions |
+| [EVAL_RESULTS.md](docs/EVAL_RESULTS.md) | Metrics deep-dive |

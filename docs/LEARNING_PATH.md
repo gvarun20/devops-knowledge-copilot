@@ -89,20 +89,6 @@ Architecture → [ARCHITECTURE.md](ARCHITECTURE.md)
 
 ---
 
-## Week 3 — Operations (industry workflow)
-
-| Step | Command / file | What you learn |
-|------|----------------|----------------|
-| — | `docs/OPERATIONS.md` | Frontend/backend separation, env config, CI |
-| — | `docker compose up` | 3-tier stack: UI + API + Qdrant |
-| — | `scripts/dev.ps1` | Standard dev commands (like a Makefile) |
-| — | `docs/index.html` | Static UI on GitHub Pages |
-| — | `.github/workflows/ci.yml` | Tests on every push |
-
-**Week 3 milestone:** one command starts UI + API; CI passes; UI deploys to GitHub Pages.
-
----
-
 ## What's next
 
-After Week 3 → [ROADMAP.md](ROADMAP.md) (deploy API to Render for public HTTPS demo)
+Project is **complete for portfolio use**. Optional polish → [ROADMAP.md](ROADMAP.md)

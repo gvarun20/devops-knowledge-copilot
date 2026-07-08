@@ -2,7 +2,7 @@
 
 This guide takes you from a fresh clone to a working **question → cited answer** system.
 
-**Industry workflow:** After setup, read **[OPERATIONS.md](OPERATIONS.md)** — how teams separate UI, API, and data.
+**Industry workflow:** After setup, read **[PORTFOLIO.md](PORTFOLIO.md)** for interview demo steps.
 
 **Time:** ~30 minutes first run (indexing dominates; ~15 min for step 4 alone).
 
@@ -169,26 +169,24 @@ Type `quit` to exit.
 
 ---
 
-## Step 7 — Full stack (recommended)
+## Step 7 — Demo (for interviews)
 
-Industry pattern: static UI talks to API over HTTP.
-
+**Simplest — terminal only:**
 ```powershell
-docker compose up -d --build
+python scripts/06_ask.py -i
 ```
 
-| Service | URL |
-|---------|-----|
-| UI | http://localhost:8080 |
-| API docs | http://localhost:8000/docs |
-
-Or use the dev helper:
-
+**With browser UI — two terminals:**
 ```powershell
-.\scripts\dev.ps1 up
-```
+# Terminal 1
+.\scripts\dev.ps1 api
 
-Keep **Ollama** running on your machine.
+# Terminal 2
+.\scripts\dev.ps1 ui-local
+```
+Open **http://localhost:8080**
+
+Full script → [PORTFOLIO.md](PORTFOLIO.md)
 
 ---
 
@@ -259,7 +257,6 @@ Doc repos in `data/raw/` can be reused — skip `01` if still present.
 
 ## Next steps
 
-- **[OPERATIONS.md](OPERATIONS.md)** — how teams run UI + API + CI
-- [LEARNING_PATH.md](LEARNING_PATH.md) — what each script teaches
+- **[PORTFOLIO.md](PORTFOLIO.md)** — resume bullets + interview demo
+- [OPERATIONS.md](OPERATIONS.md) — run commands cheat sheet
 - [ARCHITECTURE.md](ARCHITECTURE.md) — system design
-- [ROADMAP.md](ROADMAP.md) — deploy API to cloud (Week 4)

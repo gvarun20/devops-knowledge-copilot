@@ -3,7 +3,7 @@
 
 param(
     [Parameter(Position = 0)]
-    [ValidateSet("help", "infra", "up", "down", "api", "test", "ask", "index", "ui-local")]
+    [ValidateSet("help", "demo", "infra", "up", "down", "api", "test", "ask", "index", "ui-local")]
     [string]$Command = "help"
 )
 
@@ -20,19 +20,32 @@ function Ensure-Venv {
 switch ($Command) {
     "help" {
         Write-Host @"
-Standard commands (industry-style dev workflow):
+Portfolio demo commands (all free, local):
 
-  .\scripts\dev.ps1 infra      Start Qdrant only
-  .\scripts\dev.ps1 up         Full stack: Qdrant + API + UI (Docker)
-  .\scripts\dev.ps1 down       Stop all containers
-  .\scripts\dev.ps1 api        API with hot reload (local Python)
-  .\scripts\dev.ps1 test       Run pytest (same as CI)
-  .\scripts\dev.ps1 index      Run ingest + chunk + index (02-04)
-  .\scripts\dev.ps1 ask        Interactive RAG CLI
-  .\scripts\dev.ps1 ui-local   Open static UI at http://localhost:8080
+  .\scripts\dev.ps1 demo      Start Qdrant + show interview demo steps
+  .\scripts\dev.ps1 api       API — run in terminal 1
+  .\scripts\dev.ps1 ui-local  UI — run in terminal 2 (http://localhost:8080)
+  .\scripts\dev.ps1 ask       CLI chat (simplest demo, no browser)
+  .\scripts\dev.ps1 test      pytest
+  .\scripts\dev.ps1 infra     Qdrant only
+  .\scripts\dev.ps1 up        Full Docker stack (optional)
+  .\scripts\dev.ps1 down      Stop containers
 
-Docs: docs/OPERATIONS.md
+Interview guide: docs/PORTFOLIO.md
 "@
+    }
+    "demo" {
+        docker compose up -d qdrant
+        Write-Host ""
+        Write-Host "=== Portfolio demo (free, local) ===" -ForegroundColor Cyan
+        Write-Host ""
+        Write-Host "1. Keep Ollama running (system tray)"
+        Write-Host "2. Terminal 1:  .\scripts\dev.ps1 api"
+        Write-Host "3. Terminal 2:  .\scripts\dev.ps1 ui-local"
+        Write-Host "4. Browser:     http://localhost:8080"
+        Write-Host ""
+        Write-Host "Simplest (no UI):  python scripts/06_ask.py -i" -ForegroundColor Yellow
+        Write-Host ""
     }
     "infra" {
         docker compose up -d qdrant

@@ -1,98 +1,45 @@
-# Hosting the UI on GitHub Pages
+# GitHub Pages — your live website
 
-> **Start with [OPERATIONS.md](OPERATIONS.md)** for the full industry workflow (local Docker, CI, env config).
+**URL:** https://gvarun20.github.io/devops-knowledge-copilot/
 
-The **UI** is static HTML on GitHub Pages. The **API** runs separately (Docker or cloud).
-
----
-
-## Live URL (after deploy)
-
-**https://gvarun20.github.io/devops-knowledge-copilot/**
-
-(Push to `main` → GitHub Action deploys `docs/` to `gh-pages` branch.)
+A simple portfolio site: project overview, eval metrics, example answer, link to GitHub.
 
 ---
 
-## Important: UI ≠ API
+## Enable (one time)
 
-| Part | Hosted where | Always on? |
-|------|----------------|------------|
-| **UI** (`docs/index.html`) | GitHub Pages | Yes — just refresh browser |
-| **API** | Your PC or Render/Railway | Only when you start it |
+1. Push code to GitHub
+2. Repo → **Settings** → **Pages**
+3. **Build and deployment** → Source: **GitHub Actions**
+4. Push to `main` — workflow `.github/workflows/pages.yml` deploys automatically
 
-The webpage calls your API over HTTP. **Refresh the browser** anytime — no need to restart Streamlit.
+Wait 1–2 minutes, then open your URL.
 
 ---
 
-## HTTPS vs localhost (read this)
+## What's on the site
 
-GitHub Pages is **HTTPS**. Browsers **block** HTTPS pages from calling `http://127.0.0.1:8000`.
+| Section | Works on GitHub Pages? |
+|---------|------------------------|
+| Hero + about | ✅ Always |
+| Eval metrics | ✅ Always |
+| Example answer | ✅ Always (static sample) |
+| Live chat | ❌ Needs API on your laptop |
 
-So from the **live GitHub URL**:
+**Live Q&A:** clone repo → run locally → http://localhost:8080
 
-- You **cannot** use localhost API (security restriction)
-- You **need** a public **HTTPS** API (Week 3 deploy to Render/Railway)
+That's normal for free RAG projects — the hosted site shows your work; interviews use screen-share demo.
 
-### Workaround for local dev (same PC)
+---
 
-Run the UI from your machine (HTTP, not GitHub):
+## Update the site
+
+Edit `docs/index.html`, then:
 
 ```powershell
-cd E:\SUMMER_PROJECT_2ND
-uvicorn src.api.main:app --reload
+git add docs/
+git commit -m "Update website"
+git push
 ```
 
-Second terminal:
-
-```powershell
-python -m http.server 8080 --directory docs
-```
-
-Open **http://localhost:8080** → set API URL to `http://127.0.0.1:8000` → works.
-
----
-
-## Enable GitHub Pages (one time)
-
-1. GitHub repo → **Settings** → **Pages**
-2. Source: **Deploy from branch**
-3. Branch: **gh-pages** / **root**
-4. Save
-
-Or push `docs/` — the workflow creates `gh-pages` automatically.
-
----
-
-## Deploy steps
-
-```powershell
-git add docs/ .github/workflows/pages.yml src/api/main.py
-git commit -m "Add GitHub Pages UI"
-git push origin main
-```
-
-Wait ~1–2 min → open your Pages URL.
-
----
-
-## API URL in the UI
-
-The page saves **API base URL** in your browser (localStorage).
-
-- Local: `http://127.0.0.1:8000`
-- After cloud deploy: `https://your-app.onrender.com`
-
-Status pill shows **API online** / **API offline** and rechecks every 15 seconds.
-
----
-
-## Stop using Streamlit (optional)
-
-You can use GitHub Pages UI instead of Streamlit:
-
-- **Always available** UI (static HTML)
-- **Refresh browser** to reload — no Python UI process
-- Still start **API + Docker + Ollama** when you want answers
-
-Streamlit (`scripts/09_ui.py`) remains optional for local dev.
+Site updates in ~1–2 min.
