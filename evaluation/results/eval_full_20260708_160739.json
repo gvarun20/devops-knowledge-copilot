@@ -1,0 +1,11 @@
+{
+  "timestamp": "2026-07-08T16:07:39.472603+00:00",
+  "retrieval_mode": "full",
+  "metrics_preset": "local",
+  "num_questions": 5,
+  "scores": {
+    "answer_relevancy": 0.7012491498222307,
+    "context_recall": 0.4722222222222222
+  },
+  "failures": {}
+}

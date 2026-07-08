@@ -1,0 +1,13 @@
+{
+  "timestamp": "2026-07-08T15:32:03.152000+00:00",
+  "retrieval_mode": "full",
+  "metrics_preset": "local",
+  "num_questions": 1,
+  "scores": {
+    "answer_relevancy": 0.9968006257829284,
+    "context_recall": NaN
+  },
+  "failures": {
+    "context_recall": "Event loop is closed"
+  }
+}

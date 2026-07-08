@@ -59,7 +59,16 @@ def ragas_llm_and_embeddings():
 
         check_ollama(cfg["model"])
         host = cfg.get("ollama_host", "http://localhost:11434")
-        llm = ChatOllama(model=cfg["model"], base_url=host, temperature=0)
+        timeout = load_settings().get("evaluation", {}).get("ragas_timeout", 900)
+        llm = ChatOllama(
+            model=cfg["model"],
+            base_url=host,
+            temperature=0,
+            format="json",  # RAGAS faithfulness/precision need structured JSON
+            num_ctx=8192,
+            num_predict=2048,
+            client_kwargs={"timeout": timeout},
+        )
         embeddings = HuggingFaceEmbeddings(model_name=embed_name)
         return llm, embeddings
 

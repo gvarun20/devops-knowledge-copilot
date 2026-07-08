@@ -1,0 +1,11 @@
+{
+  "timestamp": "2026-07-08T14:59:29.614637+00:00",
+  "retrieval_mode": "full",
+  "num_questions": 1,
+  "scores": {
+    "faithfulness": NaN,
+    "answer_relevancy": 0.9978249994308679,
+    "context_precision": NaN,
+    "context_recall": 0.6666666666666666
+  }
+}

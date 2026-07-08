@@ -52,3 +52,8 @@ generation:
   temperature: 0.1
   max_tokens: 1024
   unknown_phrase: "I don't know based on the provided documentation."
+
+evaluation:
+  metrics: local          # local (2 metrics, reliable) | full (4 metrics, slower)
+  ragas_timeout: 900       # seconds per metric job
+  ragas_max_retries: 1

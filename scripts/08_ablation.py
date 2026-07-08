@@ -23,12 +23,13 @@ MODES = [
 
 
 @click.command()
-@click.option("--limit", default=10, type=int, help="Questions per mode (keep low to save API cost)")
-def main(limit: int) -> None:
+@click.option("--limit", default=10, type=int, help="Questions per mode (keep low on local Ollama)")
+@click.option("--metrics", default="local", type=click.Choice(["local", "full"]))
+def main(limit: int, metrics: str) -> None:
     table: dict[str, dict] = {}
     for mode, label in MODES:
         click.echo(f"\nRunning {label} ...")
-        table[mode] = run_eval(retrieval_mode=mode, limit=limit)
+        table[mode] = run_eval(retrieval_mode=mode, limit=limit, metrics_preset=metrics)
 
     click.echo("\n=== Ablation summary ===")
     header = f"{'Metric':<22}" + "".join(f"{m:<18}" for m, _ in MODES)
